@@ -172,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+lavar_key_v*
+*.pem
+*.key
+lavar_git_access_token.txt
+.env
