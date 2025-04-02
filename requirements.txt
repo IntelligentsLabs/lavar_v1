@@ -1,3 +1,9 @@
 openai
 instructor
 pydantic
+flask
+flask-cors
+flask-jwt-extended
+initialize
+python-dotenv
+groq

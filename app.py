@@ -4,11 +4,12 @@ from flask import Flask, request
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from dotenv import load_dotenv
-from initialize import initialize_tools_and_llms
+#from initialize import initialize_tools_and_llms
+
 
 # Load environment variables and initialize tools and LLMs
 load_dotenv()
-initialize_tools_and_llms()
+#initialize_tools_and_llms()
 
 # Initialize Flask app
 app = Flask(__name__)
