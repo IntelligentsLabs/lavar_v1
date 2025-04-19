@@ -4,8 +4,17 @@ import uuid
 import json
 import logging
 from flask import Response
+from dotenv import load_dotenv
+import openai
+import os
 
+load_dotenv()
+
+# Set OpenAI API key and initialize clients.
+openai.api_key = os.getenv("OPENAI_API_KEY")
+client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 logger = logging.getLogger(__name__)
+
 
 def generate_user_uuid(user_name: str, email_address: str) -> str:
     """
@@ -16,11 +25,13 @@ def generate_user_uuid(user_name: str, email_address: str) -> str:
     unique_string = f"{user_name}-{email_address}"
     return str(uuid.uuid5(namespace, unique_string))
 
+
 def generate_streaming_response(chat_completion_stream) -> str:
     """
     Convert the streaming response from the LLM into a Server-Sent Events (SSE)
     formatted string. This function returns a generator that yields SSE-formatted data.
     """
+
     def event_stream():
         try:
             # Assuming chat_completion_stream is an iterable of chunks.
@@ -29,13 +40,16 @@ def generate_streaming_response(chat_completion_stream) -> str:
                 yield f"data: {json.dumps(chunk)}\n\n"
         except Exception as e:
             logger.error(f"Error in streaming response: {e}")
+
     return event_stream()
+
 
 def generate_streaming_introduction(assistance_text: str) -> str:
     """
     Wrap the provided assistance text in SSE format so it can be streamed to the client.
     """
     return f"data: {assistance_text}\n\n"
+
 
 def provide_interaction_assistance() -> str:
     """
@@ -46,7 +60,9 @@ def provide_interaction_assistance() -> str:
         "or any self-improvement topics. For example, 'How do I build a daily habit?'"
     )
 
-def augment_system_lists(system_messages: list, incoming_messages: list) -> list:
+
+def augment_system_lists(system_messages: list,
+                         incoming_messages: list) -> list:
     """
     Combine system messages with incoming messages.
     This simple implementation prepends the system messages to the list of incoming messages.

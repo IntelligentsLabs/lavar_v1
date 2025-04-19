@@ -25,10 +25,10 @@ logging.basicConfig(level=logging.INFO)
 # Import and register API Blueprint
 #from app.api import custom_llm
 from app.api.webhook import webhook as webhook_blueprint
-#from app.api.custom_llm import custom_llm as custom_llm_blueprint
+from app.api.custom_llm import custom_llm as custom_llm_blueprint
 
 app.register_blueprint(webhook_blueprint, url_prefix='/api/webhook')
-#app.register_blueprint(custom_llm_blueprint, url_prefix='/api/custom_llm')
+app.register_blueprint(custom_llm_blueprint, url_prefix='/api/custom_llm')
 
 
 # ------------------------------
