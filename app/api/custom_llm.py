@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 custom_llm = Blueprint('custom_llm', __name__)
 
 @custom_llm.route('/chat/completions', methods=['POST'])
-async def openai_advanced_chat_completions_route_new():
+def openai_advanced_chat_completions_route_new():
     """Handle POST requests for advanced OpenAI chat completions with personalization and RAG."""
     # Parse incoming request data
     request_data = request.get_json()
