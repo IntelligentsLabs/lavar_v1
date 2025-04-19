@@ -1,6 +1,7 @@
 import os
 import logging
-from flask import Flask, request
+from flask import Flask
+from app.admin import init_admin
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -12,6 +13,8 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'  # Required for admin interface
+init_admin(app)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY",
                                          "default-secret-key")
 
