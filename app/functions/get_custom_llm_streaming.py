@@ -34,10 +34,9 @@ def generate_streaming_response(chat_completion_stream) -> str:
 
     def event_stream():
         try:
-            # Assuming chat_completion_stream is an iterable of chunks.
             for chunk in chat_completion_stream:
-                # Each chunk is converted to JSON and formatted as an SSE event.
-                yield f"data: {json.dumps(chunk)}\n\n"
+                if chunk.choices[0].delta.content is not None:
+                    yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}\n\n"
         except Exception as e:
             logger.error(f"Error in streaming response: {e}")
 

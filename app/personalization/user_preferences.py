@@ -14,13 +14,16 @@ def get_user_interaction_context(user_id: str) -> str:
     Retrieve the user's recent interactions from the voice_interactions and 
     user_book_interactions tables in Supabase, then summarize them into a single string.
     """
+    if not user_id:
+        return "No user context available"
+        
     context_entries = []
     try:
-        # Query recent voice interactions.
+        # Query recent voice interactions with proper type casting
         voice_response = (
             supabase.table("voice_interactions")
             .select("agent_response, timestamp")
-            .eq("user_id", user_id)
+            .eq("user_id", int(user_id.replace("-", "")[:8], 16))
             .order("timestamp", desc=True)
             .limit(5)
             .execute()

@@ -56,7 +56,7 @@ def list_endpoints():
 # ------------------------------
 def main():
     """Start the Flask server."""
-    port = int(os.getenv('PORT', 8000))
+    port = int(os.getenv('PORT', 5000))
     print(f"Running on port: {port}")
     app.run(port=port, debug=True)
 
