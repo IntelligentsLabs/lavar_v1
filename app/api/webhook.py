@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import asyncio
 import sqlite3
+from app.vapi_message_handlers.conversation_update import ConversationUpdate
+from app.db import store_in_database
 
 # Example imports for additional functionalities.
 # These should exist in your project; if not, create stub modules.
@@ -377,6 +379,36 @@ async def function_call_handler(payload):
         params = NameParams(gender="male", nat="US")
         return get_random_name(params)
     return None
+
+
+# In app/vapi_message_handlers/conversation_update.py
+
+
+def conversation_update_handler(payload):
+    """
+    Handler for 'conversation-update' webhook message.
+    This function processes the conversation update payload.
+    """
+    try:
+        # Validate payload using the Pydantic model
+        validated_payload = ConversationUpdate.model_validate(payload)
+
+        # Process the conversation update (store in DB, etc.)
+        # For example, storing conversation updates in the database
+        store_in_database(
+            data=[{
+                "user_id": validated_payload.metadata.user_id,
+                "conversation": validated_payload.conversation,
+                "status": validated_payload.call.status
+            }],
+            db_name="data/databases/conversation.db",
+            table_name="conversation_updates",
+            schema="user_id TEXT, conversation TEXT, status TEXT"
+        )
+        return {"status": "success"}
+    except Exception as e:
+        print(f"Error in conversation_update_handler: {e}")
+        return {"status": "error", "message": str(e)}
 
 async def status_update_handler(payload):
     """Handle status updates."""

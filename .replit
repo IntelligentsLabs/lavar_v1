@@ -6,9 +6,12 @@ channel = "stable-24_05"
 packages = ["libxcrypt"]
 
 [[ports]]
-localPort = 8000
+localPort = 5000
 externalPort = 80
 exposeLocalhost = true
+
+[[ports]]
+localPort = 8000
 
 [workflows]
 runButton = "Python"
