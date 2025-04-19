@@ -77,5 +77,40 @@ def store_in_database(data, db_name, table_name, schema):
         logging.error(f"Unexpected error: {e}")
         return False
 
-# Initialize database directory when module is imported
+def init_tables():
+    """Initialize all required database tables."""
+    # Conversation Updates table
+    store_in_database(
+        data=[],
+        db_name=f"{DB_BASE_PATH}/conversation.db",
+        table_name="conversation_updates",
+        schema="user_id TEXT, conversation TEXT, status TEXT"
+    )
+
+    # User Preferences table
+    store_in_database(
+        data=[],
+        db_name=f"{DB_BASE_PATH}/preferences.db",
+        table_name="user_preferences",
+        schema="id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT, value TEXT, description TEXT"
+    )
+
+    # Finalized Details table
+    store_in_database(
+        data=[],
+        db_name=f"{DB_BASE_PATH}/details.db",
+        table_name="finalized_details",
+        schema="id INTEGER PRIMARY KEY AUTOINCREMENT, summary TEXT, details TEXT"
+    )
+
+    # Character Inspirations table
+    store_in_database(
+        data=[],
+        db_name=f"{DB_BASE_PATH}/characters.db",
+        table_name="character_inspirations",
+        schema="id INTEGER PRIMARY KEY AUTOINCREMENT, theme TEXT, setting TEXT, traits TEXT"
+    )
+
+# Initialize database directory and tables when module is imported
 init_database_directory()
+init_tables()
