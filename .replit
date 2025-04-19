@@ -3,8 +3,21 @@ modules = ["python-3.12", "bash"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["libxcrypt"]
 
 [[ports]]
 localPort = 8000
 externalPort = 80
 exposeLocalhost = true
+
+[workflows]
+runButton = "Python"
+
+[[workflows.workflow]]
+name = "Python"
+author = 34682765
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"
