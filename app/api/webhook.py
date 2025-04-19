@@ -13,7 +13,7 @@ from app.db import store_in_database
 # Example imports for additional functionalities.
 # These should exist in your project; if not, create stub modules.
 from app.functions.schedule_clickup import generate_schedule, process_schedule, transform_llm_output
-from app.vapi_message_handlers.conversation_update import ConversationUpdate
+# from app.vapi_message_handlers.conversation_update import ConversationUpdate
 from app.vapi_message_handlers.end_of_call_report import EndOfCallReport
 from app.vapi_message_handlers.model_output import ModelOutput
 from app.vapi_message_handlers.speech_update import SpeechUpdate
