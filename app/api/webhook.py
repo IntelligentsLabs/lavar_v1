@@ -20,8 +20,8 @@ from app.vapi_message_handlers.speech_update import SpeechUpdate
 from app.vapi_message_handlers.transcript import Transcript
 
 # Constants for logging and database paths.
-LOG_FILE_PATH = "/path/to/app/response_data/webhook_logs.txt"
-LOG_TOOL_PATH = "/path/to/app/response_data/tool_logs.txt"
+LOG_FILE_PATH = "app/response_data/webhook_logs.txt"
+LOG_TOOL_PATH = "app/response_data/tool_logs.txt"
 DB_BASE_PATH = "data/databases"
 
 # Initialize the Blueprint.
