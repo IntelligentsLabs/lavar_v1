@@ -25,22 +25,27 @@ def generate_user_uuid(user_name: str, email_address: str) -> str:
     unique_string = f"{user_name}-{email_address}"
     return str(uuid.uuid5(namespace, unique_string))
 
+def generate_streaming_response(data):
+    for message in data:
+        json_data = message.model_dump_json()
+        logger.info(f"JSON data: {json.dumps(json_data, indent=2)}")
+        yield f"data: {json_data}\n\n"
+        
+# def generate_streaming_response(chat_completion_stream) -> str:
+#     """
+#     Convert the streaming response from the LLM into a Server-Sent Events (SSE)
+#     formatted string. This function returns a generator that yields SSE-formatted data.
+#     """
 
-def generate_streaming_response(chat_completion_stream) -> str:
-    """
-    Convert the streaming response from the LLM into a Server-Sent Events (SSE)
-    formatted string. This function returns a generator that yields SSE-formatted data.
-    """
+#     def event_stream():
+#         try:
+#             for chunk in chat_completion_stream:
+#                 if chunk.choices[0].delta.content is not None:
+#                     yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}\n\n"
+#         except Exception as e:
+#             logger.error(f"Error in streaming response: {e}")
 
-    def event_stream():
-        try:
-            for chunk in chat_completion_stream:
-                if chunk.choices[0].delta.content is not None:
-                    yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}\n\n"
-        except Exception as e:
-            logger.error(f"Error in streaming response: {e}")
-
-    return event_stream()
+#     return event_stream()
 
 
 def generate_streaming_introduction(assistance_text: str) -> str:
