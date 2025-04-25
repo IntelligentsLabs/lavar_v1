@@ -5,6 +5,8 @@ from app.admin import init_admin
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from dotenv import load_dotenv
+from app.api.webhook import webhook as webhook_blueprint
+from app.api.custom_llm import custom_llm as custom_llm_blueprint
 #from initialize import initialize_tools_and_llms
 
 # Load environment variables and initialize tools and LLMs
@@ -35,8 +37,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Import and register API Blueprint
 #from app.api import custom_llm
-from app.api.webhook import webhook as webhook_blueprint
-from app.api.custom_llm import custom_llm as custom_llm_blueprint
+
 
 app.register_blueprint(webhook_blueprint, url_prefix='/api/webhook')
 app.register_blueprint(custom_llm_blueprint, url_prefix='/api/custom_llm')
