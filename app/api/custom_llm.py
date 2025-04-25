@@ -88,7 +88,7 @@ def openai_advanced_chat_completions_route_new():
         user_name = user_data.get("username", "unknown")
         email_address = user_data.get("email", "unknown")
         user_id = generate_user_uuid(user_name, email_address)
-        user_id = 1
+        user_id = '01f5f562-bdb0-43e4-a907-09c8f3da9db5'
         # Retrieve additional user data and interactions
         user_interaction_context = get_user_interaction_context(
             user_id)  # e.g., from Supabase
