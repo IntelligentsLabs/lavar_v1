@@ -19,7 +19,15 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY",
                                          "default-secret-key")
 
 # Enable CORS and JWT authentication
-CORS(app)
+CORS(app, 
+     resources={
+         r"/*": {
+             "origins": ["https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000"],
+             "methods": ["GET", "POST", "OPTIONS"],
+             "allow_credentials": True,
+             "allow_headers": ["Content-Type", "Authorization"]
+         }
+     })
 jwt = JWTManager(app)  # Initialize JWT with the Flask app
 
 # Configure logging
