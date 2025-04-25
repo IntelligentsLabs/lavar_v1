@@ -3,7 +3,7 @@ import logging
 
 from app.personalization.user_preferences import get_user_preferences, get_user_interaction_context
 from app.rag import pinecone_rag
-
+from app.api.db import *
 from app.functions.get_custom_llm_streaming import (
     client_openai, generate_user_uuid, generate_streaming_response,
     generate_streaming_introduction, provide_interaction_assistance,
