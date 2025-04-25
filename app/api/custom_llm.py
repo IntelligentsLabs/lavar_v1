@@ -20,6 +20,39 @@ logger = logging.getLogger(__name__)
 custom_llm = Blueprint('custom_llm', __name__)
 
 
+@custom_llm.route('/token', methods=['POST'])
+def test():
+    username, email, picture = request.json.get('username'), request.json.get(
+        'email'), request.json.get('picture')
+    user_exists = check_if_user_exists(email)
+    if not user_exists:
+        result = str(
+            create_user({
+                'username': username,
+                'email': email,
+                'picture': picture,
+                'current_bg': 'black',
+                'notifications': [],
+                'character': {
+                    'name': '',
+                    'alias': '',
+                    'super_skill': '',
+                    'weakness': '',
+                    'powers': [],
+                    'equipments': [],
+                    'height': '',
+                    'age': 0,
+                    'birthplace': ''
+                }
+            }).inserted_id)
+        access_token = create_access_token(identity=result)
+    else:
+        result = str(get_user_by_email(email)['_id'])
+        access_token = create_access_token(identity=result)
+
+    return jsonify(access_token=access_token, success=True)
+
+
 @custom_llm.route('/chat/completions', methods=['POST'])
 def openai_advanced_chat_completions_route_new():
     """Handle POST requests for advanced OpenAI chat completions with personalization and RAG."""
@@ -138,7 +171,9 @@ def openai_advanced_chat_completions_route_new():
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
-        return jsonify({"error":"An unexpected error occurred. Please try again later."}), 500
+        return jsonify(
+            {"error":
+             "An unexpected error occurred. Please try again later."}), 500
 
     return jsonify({
         "message":

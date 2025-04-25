@@ -1,0 +1,323 @@
+{
+    "message": {
+      "timestamp": 1731157911127,
+      "type": "tool-calls",
+      "toolCalls": [
+        {
+          "id": "call_yvYoWjpAj93dlAafdHWoGwge",
+          "type": "function",
+          "function": {
+            "name": "storeQuestionsAndAnswers",
+            "arguments": {
+              "Answer": "R and B, gospel, and hip hop",
+              "Question": "What is your favorite genre of music to make?",
+              "EmailAddress": "jon@intelligents.com"
+            }
+          }
+        }
+      ],
+      "toolCallList": [
+        {
+          "id": "call_yvYoWjpAj93dlAafdHWoGwge",
+          "type": "function",
+          "function": {
+            "name": "storeQuestionsAndAnswers",
+            "arguments": {
+              "Answer": "R and B, gospel, and hip hop",
+              "Question": "What is your favorite genre of music to make?",
+              "EmailAddress": "jon@intelligents.com"
+            }
+          }
+        }
+      ],
+      "toolWithToolCallList": [
+        {
+          "type": "function",
+          "function": {
+            "name": "storeQuestionsAndAnswers",
+            "async": false,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "Answer": {
+                  "type": "string",
+                  "description": "This is the response to a question by the interviewee"
+                },
+                "Question": {
+                  "type": "string",
+                  "description": "This is the question that was asked by the interviewer"
+                },
+                "EmailAddress": {
+                  "type": "string",
+                  "description": "This is the email address of the person being interviewed"
+                }
+              }
+            },
+            "description": "Called when answers are received by questions asked by the interviewer."
+          },
+          "async": false,
+          "server": {
+            "url": "https://ur25uwuuxf5ssomkfe26k462ua0hnxpj.lambda-url.us-east-1.on.aws/"
+          },
+          "messages": [],
+          "toolCall": {
+            "id": "call_yvYoWjpAj93dlAafdHWoGwge",
+            "type": "function",
+            "function": {
+              "name": "storeQuestionsAndAnswers",
+              "arguments": {
+                "Answer": "R and B, gospel, and hip hop",
+                "Question": "What is your favorite genre of music to make?",
+                "EmailAddress": "jon@intelligents.com"
+              }
+            }
+          }
+        }
+      ],
+      "artifact": {
+        "messages": [
+          {
+            "role": "system",
+            "message": "You are an interviewer that wants to gather personal information about people. So you're going to ask questions until you get 3 good facts about the person you're talking to. The email address of the person you are interviewing is 'jon@intelligents.com'. When you store facts about Jon I want you to also send his email address with the facts.",
+            "time": 1731157870861,
+            "secondsFromStart": 0
+          },
+          {
+            "role": "bot",
+            "message": "Hi, John. I'm going to interview you. Let's start now.",
+            "time": 1731157872419,
+            "endTime": 1731157875549,
+            "secondsFromStart": 1.1999999,
+            "duration": 2890,
+            "source": ""
+          },
+          {
+            "role": "user",
+            "message": "Okay.",
+            "time": 1731157876239,
+            "endTime": 1731157876739,
+            "secondsFromStart": 5.02,
+            "duration": 500
+          },
+          {
+            "role": "bot",
+            "message": "Just a sec.",
+            "time": 1731157877549,
+            "endTime": 1731157878509,
+            "secondsFromStart": 6.33,
+            "duration": 960,
+            "source": ""
+          },
+          {
+            "toolCalls": [
+              {
+                "id": "call_R0AfoaLJhxQT8tCZfYqYFyV8",
+                "type": "function",
+                "function": {
+                  "name": "storeQuestionsAndAnswers",
+                  "arguments": "{\n  \"Question\": \"What is your favorite hobby?\",\n  \"EmailAddress\": \"jon@intelligents.com\"\n}"
+                }
+              }
+            ],
+            "role": "tool_calls",
+            "message": "",
+            "time": 1731157878258,
+            "secondsFromStart": 5.22
+          },
+          {
+            "role": "tool_call_result",
+            "time": 1731157879053,
+            "secondsFromStart": 6.015,
+            "name": "storeQuestionsAndAnswers",
+            "result": "No result returned.",
+            "toolCallId": "call_R0AfoaLJhxQT8tCZfYqYFyV8"
+          },
+          {
+            "role": "bot",
+            "message": "What is your favorite hobby?",
+            "time": 1731157879069,
+            "endTime": 1731157880369,
+            "secondsFromStart": 7.85,
+            "duration": 1300,
+            "source": ""
+          },
+          {
+            "role": "user",
+            "message": "My favorite hobby is making beautiful music.",
+            "time": 1731157880969,
+            "endTime": 1731157884499,
+            "secondsFromStart": 9.75,
+            "duration": 2760
+          },
+          {
+            "role": "bot",
+            "message": "Just a sec.",
+            "time": 1731157885069,
+            "endTime": 1731157886049,
+            "secondsFromStart": 13.85,
+            "duration": 980,
+            "source": ""
+          },
+          {
+            "toolCalls": [
+              {
+                "id": "call_Yv1nNk76H32Ir6yKN07rofkh",
+                "type": "function",
+                "function": {
+                  "name": "storeQuestionsAndAnswers",
+                  "arguments": "{\n  \"Answer\": \"making beautiful music\",\n  \"Question\": \"What is your favorite hobby?\",\n  \"EmailAddress\": \"jon@intelligents.com\"\n}"
+                }
+              }
+            ],
+            "role": "tool_calls",
+            "message": "",
+            "time": 1731157885780,
+            "secondsFromStart": 12.742
+          },
+          {
+            "role": "tool_call_result",
+            "time": 1731157886632,
+            "secondsFromStart": 13.594,
+            "name": "storeQuestionsAndAnswers",
+            "result": "No result returned.",
+            "toolCallId": "call_Yv1nNk76H32Ir6yKN07rofkh"
+          },
+          {
+            "role": "bot",
+            "message": "That's interesting.",
+            "time": 1731157886528.999,
+            "endTime": 1731157887269,
+            "secondsFromStart": 15.309999,
+            "duration": 740.0009765625,
+            "source": ""
+          },
+          {
+            "role": "bot",
+            "message": "What kind of music do you like to make?",
+            "time": 1731157888059,
+            "endTime": 1731157889839,
+            "secondsFromStart": 16.84,
+            "duration": 1780,
+            "source": ""
+          },
+          {
+            "role": "user",
+            "message": "I like to make, uh, R and B, gospel, and hip hop. Sure.",
+            "time": 1731157891258.999,
+            "endTime": 1731157895949,
+            "secondsFromStart": 20.039999,
+            "duration": 4450.0009765625
+          },
+          {
+            "role": "bot",
+            "message": "Hold on a sec.",
+            "time": 1731157895899,
+            "endTime": 1731157896929,
+            "secondsFromStart": 24.68,
+            "duration": 1030,
+            "source": ""
+          },
+          {
+            "toolCalls": [
+              {
+                "id": "call_Yv1nNk76H32Ir6yKN07rofkh",
+                "type": "function",
+                "function": {
+                  "name": "storeQuestionsAndAnswers",
+                  "arguments": "{\n  \"Question\": \"What is your favorite genre of music to make?\",\n  \"EmailAddress\": \"jon@intelligents.com\"\n}"
+                }
+              },
+              {
+                "id": "call_3Fu7t9i2Eo1Rqr7E9fvWAF6G",
+                "type": "function",
+                "function": {
+                  "name": "storeQuestionsAndAnswers",
+                  "arguments": "{\n  \"Question\": \"Do you perform live or record your music?\",\n  \"EmailAddress\": \"jon@intelligents.com\"\n}"
+                }
+              }
+            ],
+            "role": "tool_calls",
+            "message": "",
+            "time": 1731157896693,
+            "secondsFromStart": 23.655
+          },
+          {
+            "role": "tool_call_result",
+            "time": 1731157897508,
+            "secondsFromStart": 24.47,
+            "name": "storeQuestionsAndAnswers",
+            "result": "No result returned.",
+            "toolCallId": "call_Yv1nNk76H32Ir6yKN07rofkh"
+          },
+          {
+            "role": "tool_call_result",
+            "time": 1731157897508,
+            "secondsFromStart": 24.47,
+            "name": "storeQuestionsAndAnswers",
+            "result": "No result returned.",
+            "toolCallId": "call_3Fu7t9i2Eo1Rqr7E9fvWAF6G"
+          },
+          {
+            "role": "bot",
+            "message": "Do you perform live or record your music?",
+            "time": 1731157897808.998,
+            "endTime": 1731157900089,
+            "secondsFromStart": 26.589998,
+            "duration": 2280.001953125,
+            "source": ""
+          },
+          {
+            "role": "user",
+            "message": "Perform live? What do you mean by that?",
+            "time": 1731157902579,
+            "endTime": 1731157904689,
+            "secondsFromStart": 31.36,
+            "duration": 2110
+          },
+          {
+            "role": "bot",
+            "message": "I mean, do you play your music at live events?",
+            "time": 1731157905429,
+            "endTime": 1731157907609,
+            "secondsFromStart": 34.21,
+            "duration": 2180,
+            "source": ""
+          },
+          {
+            "role": "user",
+            "message": "Oh,",
+            "time": 1731157907649,
+            "endTime": 1731157908149,
+            "secondsFromStart": 36.43,
+            "duration": 500
+          },
+          {
+            "role": "bot",
+            "message": "Concerts,",
+            "time": 1731157907889.002,
+            "endTime": 1731157908389.002,
+            "secondsFromStart": 36.670002,
+            "duration": 500,
+            "source": ""
+          },
+          {
+            "toolCalls": [
+              {
+                "id": "call_yvYoWjpAj93dlAafdHWoGwge",
+                "type": "function",
+                "function": {
+                  "name": "storeQuestionsAndAnswers",
+                  "arguments": "{\n  \"Answer\": \"R and B, gospel, and hip hop\",\n  \"Question\": \"What is your favorite genre of music to make?\",\n  \"EmailAddress\": \"jon@intelligents.com\"\n}"
+                }
+              }
+            ],
+            "role": "tool_calls",
+            "message": "",
+            "time": 1731157911126,
+            "secondsFromStart": 38.088
+          }
+        ]
+      }
+    }
+  }
+  

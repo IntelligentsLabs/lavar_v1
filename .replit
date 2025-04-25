@@ -1,9 +1,13 @@
 run = "python app.py"
-modules = ["python-3.12", "bash"]
+modules = ["bash", "nodejs-20", "python-3.12"]
 
 [nix]
 channel = "stable-24_05"
 packages = ["libxcrypt"]
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
 
 [[ports]]
 localPort = 5000
