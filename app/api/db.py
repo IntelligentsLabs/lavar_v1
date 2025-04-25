@@ -1,4 +1,7 @@
 from pymongo import MongoClient
+import ssl
+from os import getenv
+MONGO_URI = getenv('MONGODB_URI', 'mongodb://localhost:27017')
 from pymongo.server_api import ServerApi
 
 import bson
@@ -19,7 +22,18 @@ Users = main.users
 
 
 def get_user_by_email(email):
-    return Users.find_one({"email": email})
+    try:
+    client = MongoClient(
+        MONGO_URI,
+        ssl=True,
+        ssl_cert_reqs=ssl.CERT_NONE,  # Only for development
+        serverSelectionTimeoutMS=5000
+    )
+    db = client.get_database()
+    return db.users.find_one({"email": email})
+except Exception as e:
+    print(f"MongoDB connection error: {e}")
+    return None
 
 
 def get_user_by_id(id):
