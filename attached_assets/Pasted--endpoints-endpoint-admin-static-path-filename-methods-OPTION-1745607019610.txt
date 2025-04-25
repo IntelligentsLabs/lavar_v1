@@ -1,0 +1,140 @@
+{
+  "endpoints": [
+    {
+      "endpoint": "/admin/static/<path:filename>",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/userpreference/action/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/userpreference/ajax/lookup/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/userpreference/ajax/update/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/userpreference/new/",
+      "methods": "POST,OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/userpreference/delete/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/userpreference/details/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/userpreference/edit/",
+      "methods": "POST,OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/userpreference/export/<export_type>/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/userpreference/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/action/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/ajax/lookup/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/ajax/update/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/new/",
+      "methods": "POST,OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/delete/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/details/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/edit/",
+      "methods": "POST,OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/export/<export_type>/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/finalizeddetail/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/action/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/ajax/lookup/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/ajax/update/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/new/",
+      "methods": "POST,OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/delete/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/details/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/edit/",
+      "methods": "POST,OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/export/<export_type>/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/admin/characterinspiration/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/api/webhook/",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/api/custom_llm/token",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/api/custom_llm/chat/completions",
+      "methods": "POST,OPTIONS"
+    },
+    {
+      "endpoint": "/",
+      "methods": "OPTIONS,GET,HEAD"
+    },
+    {
+      "endpoint": "/endpoints",
+      "methods": "OPTIONS,GET,HEAD"
+    }
+  ]
+}
