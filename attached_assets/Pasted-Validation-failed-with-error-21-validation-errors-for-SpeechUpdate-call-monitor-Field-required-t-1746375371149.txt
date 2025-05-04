@@ -1,0 +1,64 @@
+Validation failed with error: 21 validation errors for SpeechUpdate
+call.monitor
+  Field required [type=missing, input_value={'id': '07587321-0342-4e1...update', 'transcript']}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+call.transport
+  Field required [type=missing, input_value={'id': '07587321-0342-4e1...update', 'transcript']}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+call.webCallUrl
+  Field required [type=missing, input_value={'id': '07587321-0342-4e1...update', 'transcript']}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+call.status
+  Field required [type=missing, input_value={'id': '07587321-0342-4e1...update', 'transcript']}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+call.assistantId
+  Field required [type=missing, input_value={'id': '07587321-0342-4e1...update', 'transcript']}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.orgId
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.createdAt
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.updatedAt
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.model
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.transcriber
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.silenceTimeoutSeconds
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.clientMessages
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.serverMessages
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.serverUrl
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.maxDurationSeconds
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.metadata
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.backgroundSound
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.backchannelingEnabled
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.backgroundDenoisingEnabled
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.messagePlan
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.startSpeakingPlan
+  Field required [type=missing, input_value={'id': 'b33d016a-db85-4e3...stMessage': 'Hi there!'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
