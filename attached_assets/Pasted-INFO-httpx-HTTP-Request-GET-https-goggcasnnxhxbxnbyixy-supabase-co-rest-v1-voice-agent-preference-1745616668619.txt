@@ -1,0 +1,66 @@
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_agent_preferences?select=speaking_rate%2Cinteraction_style%2Cexplanation_detail_level%2Cdiscussion_depth&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/cognitive_preferences?select=learning_style%2Creading_pace%2Cpreferred_complexity_level%2Cpreferred_interaction_frequency&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+Embedding text: He told me about Atomic Habits. Suspend as an assurance. He was don't know if he was a bear or a a a dog, a bear, something like that. Correct? And when a gorilla and his lips a lips so I must get a pizza out of it.
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+ERROR:app.api.custom_llm:Unexpected error: 'FetchResponse' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/runner/workspace/app/api/custom_llm.py", line 152, in openai_advanced_chat_completions_route_new
+    context_strings = pinecone_rag.query_pinecone_book(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/app/rag/pinecone_rag.py", line 119, in query_pinecone_book
+    text = individual_result['vectors'][str(idx)]['metadata'].get('text', '')
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+TypeError: 'FetchResponse' object is not subscriptable
+INFO:werkzeug:127.0.0.1 - - [25/Apr/2025 21:29:27] "POST /api/custom_llm/chat/completions HTTP/1.1" 500 -
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_interactions?select=agent_response%2Ctimestamp&user_id=eq.32896354&order=timestamp.desc&limit=5 "HTTP/2 400 Bad Request"
+Error fetching user interaction context for user 01f5f562-bdb0-43e4-a907-09c8f3da9db5: {'code': '22P02', 'details': None, 'hint': None, 'message': 'invalid input syntax for type uuid: "32896354"'}
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_agent_preferences?select=speaking_rate%2Cinteraction_style%2Cexplanation_detail_level%2Cdiscussion_depth&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/cognitive_preferences?select=learning_style%2Creading_pace%2Cpreferred_complexity_level%2Cpreferred_interaction_frequency&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+Embedding text: He told me about Atomic Habits. Suspend as an assurance. He was don't know if he was a bear or a a a dog, a bear, something like that. Correct? And when a gorilla and his lips a lips so I must get a pizza out of it. I'm a show you.
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+ERROR:app.api.custom_llm:Unexpected error: 'FetchResponse' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/runner/workspace/app/api/custom_llm.py", line 152, in openai_advanced_chat_completions_route_new
+    context_strings = pinecone_rag.query_pinecone_book(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/app/rag/pinecone_rag.py", line 119, in query_pinecone_book
+    text = individual_result['vectors'][str(idx)]['metadata'].get('text', '')
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+TypeError: 'FetchResponse' object is not subscriptable
+INFO:werkzeug:127.0.0.1 - - [25/Apr/2025 21:29:29] "POST /api/custom_llm/chat/completions HTTP/1.1" 500 -
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_interactions?select=agent_response%2Ctimestamp&user_id=eq.32896354&order=timestamp.desc&limit=5 "HTTP/2 400 Bad Request"
+Error fetching user interaction context for user 01f5f562-bdb0-43e4-a907-09c8f3da9db5: {'code': '22P02', 'details': None, 'hint': None, 'message': 'invalid input syntax for type uuid: "32896354"'}
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_agent_preferences?select=speaking_rate%2Cinteraction_style%2Cexplanation_detail_level%2Cdiscussion_depth&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/cognitive_preferences?select=learning_style%2Creading_pace%2Cpreferred_complexity_level%2Cpreferred_interaction_frequency&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+Embedding text: He told me about Atomic Habits. Suspend as an assurance. He was don't know if he was a bear or a a a dog, a bear, something like that. Correct? And when a gorilla and his lips a lips so I must get a pizza out of it. I'm a show you. But he's looked like banana barbecuedra.
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+ERROR:app.api.custom_llm:Unexpected error: 'FetchResponse' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/runner/workspace/app/api/custom_llm.py", line 152, in openai_advanced_chat_completions_route_new
+    context_strings = pinecone_rag.query_pinecone_book(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/app/rag/pinecone_rag.py", line 119, in query_pinecone_book
+    text = individual_result['vectors'][str(idx)]['metadata'].get('text', '')
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+TypeError: 'FetchResponse' object is not subscriptable
+INFO:werkzeug:127.0.0.1 - - [25/Apr/2025 21:29:30] "POST /api/custom_llm/chat/completions HTTP/1.1" 500 -
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_interactions?select=agent_response%2Ctimestamp&user_id=eq.32896354&order=timestamp.desc&limit=5 "HTTP/2 400 Bad Request"
+Error fetching user interaction context for user 01f5f562-bdb0-43e4-a907-09c8f3da9db5: {'code': '22P02', 'details': None, 'hint': None, 'message': 'invalid input syntax for type uuid: "32896354"'}
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/voice_agent_preferences?select=speaking_rate%2Cinteraction_style%2Cexplanation_detail_level%2Cdiscussion_depth&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: GET https://goggcasnnxhxbxnbyixy.supabase.co/rest/v1/cognitive_preferences?select=learning_style%2Creading_pace%2Cpreferred_complexity_level%2Cpreferred_interaction_frequency&user_id=eq.01f5f562-bdb0-43e4-a907-09c8f3da9db5 "HTTP/2 200 OK"
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+Embedding text: He told me about Atomic Habits. Suspend as an assurance. He was don't know if he was a bear or a a a dog, a bear, something like that. Correct? And when a gorilla and his lips a lips so I must get a pizza out of it. I'm a show you. But he's looked like banana barbera, um, thing just You would do most of that?
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+ERROR:app.api.custom_llm:Unexpected error: 'FetchResponse' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/runner/workspace/app/api/custom_llm.py", line 152, in openai_advanced_chat_completions_route_new
+    context_strings = pinecone_rag.query_pinecone_book(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/app/rag/pinecone_rag.py", line 119, in query_pinecone_book
+    text = individual_result['vectors'][str(idx)]['metadata'].get('text', '')
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+TypeError: 'FetchResponse' object is not subscriptable
+INFO:werkzeug:127.0.0.1 - - [25/Apr/2025 21:29:34] "POST /api/custom_llm/chat/completions HTTP/1.1" 500 -

@@ -1,0 +1,57 @@
+MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added. Use emitter.setMaxListeners() to increase limit
+    at _addListener (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:24097:15)
+    at Vapi.addListener (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:24108:10)
+    at Vapi.on (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:23263:11)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:709:10
+    at commitHookEffectListMount (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:52164:30)
+    at commitPassiveMountOnFiber (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53657:17)
+    at commitPassiveMountEffects_complete (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53629:13)
+    at commitPassiveMountEffects_begin (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53619:11)
+    at commitPassiveMountEffects (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53609:7)
+    at flushPassiveEffectsImpl (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55492:7) Error Component Stack
+    at VoiceButton (VoiceButton.jsx:7:1)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at chunk-MGHLJVLI.mjs:13:1
+    at Tabs (chunk-25S546L6.mjs:26:1)
+    at div (<anonymous>)
+    at InterviewChat (interviewChat.jsx:14:1)
+    at RenderedRoute (hooks.tsx:657:1)
+    at Routes (components.tsx:504:1)
+    at main (<anonymous>)
+    at MotionComponent (index.mjs:34:1)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at Layout (layout.jsx:8:1)
+    at main (<anonymous>)
+    at MainLayout (App.jsx:33:1)
+    at RenderedRoute (hooks.tsx:657:1)
+    at Routes (components.tsx:504:1)
+    at Router (components.tsx:413:1)
+    at BrowserRouter (index.tsx:774:1)
+    at App (<anonymous>)
+    at Auth0Provider (auth0-provider.tsx:137:1)
+overrideMethod @ hook.js:608
+ProcessEmitWarning @ events.js:46
+_addListener @ events.js:219
+addListener @ events.js:227
+on @ vapi.js:40
+(anonymous) @ VoiceButton.jsx:99
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+performSyncWorkOnRoot @ react-dom.development.js:26115
+flushSyncCallbacks @ react-dom.development.js:12042
+commitRootImpl @ react-dom.development.js:26998
+commitRoot @ react-dom.development.js:26721
+finishConcurrentRender @ react-dom.development.js:26020
+performConcurrentWorkOnRoot @ react-dom.development.js:25848
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533Understand this warning

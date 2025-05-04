@@ -1,0 +1,38 @@
+Failed to fetch
+TypeError: Failed to fetch
+    at getUser (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:477:25)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:489:26
+    at commitHookEffectListMount (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:52164:30)
+    at commitPassiveMountOnFiber (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53657:17)
+    at commitPassiveMountEffects_complete (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53629:13)
+    at commitPassiveMountEffects_begin (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53619:11)
+    at commitPassiveMountEffects (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53609:7)
+    at flushPassiveEffectsImpl (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55492:7)
+    at flushPassiveEffects (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55445:18)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55260:13
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at getUser (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:477:25)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:489:26
+    at commitHookEffectListMount (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:52164:30)
+    at commitPassiveMountOnFiber (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53657:17)
+    at commitPassiveMountEffects_complete (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53629:13)
+    at commitPassiveMountEffects_begin (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53619:11)
+    at commitPassiveMountEffects (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53609:7)
+    at flushPassiveEffectsImpl (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55492:7)
+    at flushPassiveEffects (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55445:18)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55260:13
+ERROR
+Failed to fetch
+TypeError: Failed to fetch
+    at getUser (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:477:25)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:489:26
+    at commitHookEffectListMount (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:52164:30)
+    at invokePassiveEffectMountInDEV (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:53853:17)
+    at invokeEffectsInDev (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55750:15)
+    at commitDoubleInvokeEffectsInDEV (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55733:11)
+    at flushPassiveEffectsImpl (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55506:9)
+    at flushPassiveEffects (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55445:18)
+    at https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:55260:13
+    at workLoop (https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/static/js/bundle.js:67722:38)

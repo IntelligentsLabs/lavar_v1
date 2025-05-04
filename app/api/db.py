@@ -8,11 +8,10 @@ import os
 # Create a new client and connect to the server
 objId = bson.objectid.ObjectId
 
-uri = os.getenv('MONGO_URI')
+uri = "mongodb+srv://cclarke411:Blackpanther2614@cluster0.feozg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
-print(uri)
 # Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
+client = MongoClient(uri)
 main = client.appdb
 # User collection
 Users = main.users

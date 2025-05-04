@@ -60,7 +60,7 @@ def list_endpoints():
     output = []
     for rule in app.url_map.iter_rules():
         if rule.endpoint != 'static':
-            methods = ','.join(rule.methods)
+            methods = ','.join(rule.methods or [])
             output.append({"endpoint": rule.rule, "methods": methods})
     return {"endpoints": output}
 

@@ -1,0 +1,28 @@
+ror in conversation_update_handler: 9 validation errors for ConversationUpdate
+call.assistantOverrides.name
+  Input should be a valid list [type=list_type, input_value='Mary', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+call.assistantOverrides.transcriber
+  Input should be a valid list [type=list_type, input_value={'provider': 'deepgram', ...2', 'language': 'en-US'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+call.assistantOverrides.model
+  Input should be a valid list [type=list_type, input_value={'model': 'gpt-4o', 'prov...m_llm/chat/completions'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+call.assistantOverrides.voice
+  Input should be a valid list [type=list_type, input_value={'provider': 'playht', 'voiceId': 'jennifer'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+call.assistantOverrides.firstMessage
+  Input should be a valid list [type=list_type, input_value='hi Clyde', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+call.assistantOverrides.metadata
+  Input should be a valid list [type=list_type, input_value={'token': 'eyJhbGciOiJIUz...MJ9_TJuAT_TUHa=s96-c'}}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+assistant.voice.model
+  Field required [type=missing, input_value={'provider': 'playht', 'voiceId': 'jennifer'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.voice.fillerInjectionEnabled
+  Field required [type=missing, input_value={'provider': 'playht', 'voiceId': 'jennifer'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+assistant.model.emotionRecognitionEnabled
+  Field required [type=missing, input_value={'url': 'https://66793246...ook/'}, 'async': True}]}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing

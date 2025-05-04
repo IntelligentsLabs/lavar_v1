@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, Response
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 import logging
-
 from app.personalization.user_preferences import get_user_preferences, get_user_interaction_context
 from app.rag import pinecone_rag
 from app.api.db import *
@@ -8,6 +8,13 @@ from app.functions.get_custom_llm_streaming import (
     client_openai, generate_user_uuid, generate_streaming_response,
     generate_streaming_introduction, provide_interaction_assistance,
     augment_system_lists)
+import pandas as pd
+
+df = pd.read_csv('data/ah_index.csv')
+atomic_habits_concept = df['concept'].tolist()
+atomic_habits_words = df['word'].tolist()
+
+atomic_habits_keywords = atomic_habits_concept + atomic_habits_words
 
 # Constants for Pinecone indexes
 user_index = pinecone_rag.user_index
@@ -18,6 +25,14 @@ logger = logging.getLogger(__name__)
 
 # Initialize the Blueprint
 custom_llm = Blueprint('custom_llm', __name__)
+
+# CORS(
+#     custom_llm,
+#     supports_credentials=True,
+#     origins=[
+#         "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000/authorize",
+#         "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3000"
+#     ])
 
 
 @custom_llm.route('/token', methods=['POST'])
@@ -46,11 +61,38 @@ def test():
                 }
             }).inserted_id)
         access_token = create_access_token(identity=result)
+        print(access_token)
     else:
         result = str(get_user_by_email(email)['_id'])
         access_token = create_access_token(identity=result)
 
     return jsonify(access_token=access_token, success=True)
+
+
+@custom_llm.route('/user')
+@jwt_required()
+def get_user():
+    user_id = get_jwt_identity()
+    user = get_user_by_id(user_id)
+    user['_id'] = str(user['_id'])
+    return jsonify(user=user, success=True)
+
+
+@custom_llm.route('/color', methods=['POST'])
+def add_color():
+    user_id = get_jwt_identity()
+    color = request.json['color']
+    add_color_to_user(color, user_id)
+    return jsonify(success=True)
+
+
+@custom_llm.route('/character', methods=['POST'])
+def add_to_book():
+    user_id = get_jwt_identity()
+    key, value = f"{request.json['key']}", request.json['value']
+    changes = {key: value}
+    change_char(changes, user_id)
+    return jsonify(success=True)
 
 
 @custom_llm.route('/chat/completions', methods=['POST'])
@@ -61,6 +103,23 @@ def openai_advanced_chat_completions_route_new():
     if not request_data.get("model", []):
         return jsonify({"error": "No JSON data provided in the request."}), 400
 
+    metadata = request_data.get("metadata", {})
+    token = metadata.get("token", None)
+    user_data = metadata.get("data", {}).get("user", {})
+    # user_name = user_data.get("username", "unknown")
+    email_address = user_data.get("email", "unknown")
+    
+    if not token:
+        return jsonify({"error":
+                        "JWT token not provided in metadata."}), 401
+
+    try:
+        decoded = decode_token(token)
+        user_id = decoded['sub']
+    except Exception as e:
+        logger.error(f"Invalid JWT: {str(e)}")
+        return jsonify({"error": "Invalid token."}), 401
+    
     try:
         # Extract data from the request
         messages = request_data.get("messages", [])
@@ -83,22 +142,22 @@ def openai_advanced_chat_completions_route_new():
                             content_type='text/event-stream')
 
         # Capture user metadata from the request (assumes a metadata structure)
-        metadata = request_data.get("metadata", {})
-        user_data = metadata.get("data", {}).get("user", {})
-        user_name = user_data.get("username", "unknown")
-        email_address = user_data.get("email", "unknown")
-        user_id = generate_user_uuid(user_name, email_address)
-        user_id = '01f5f562-bdb0-43e4-a907-09c8f3da9db5'
+        # metadata = request_data.get("metadata", {})
+
+        user_id = generate_user_uuid(user_id)
+        # user_id = '01f5f562-bdb0-43e4-a907-09c8f3da9db5'
+
+
+            
         # Retrieve additional user data and interactions
-        user_interaction_context = get_user_interaction_context(
-            user_id)  # e.g., from Supabase
+        user_interaction_context = get_user_interaction_context(user_id)  # e.g., from Supabase
         user_preferences = get_user_preferences(user_id)
 
         # Retrieve book-related context using RAG:
-        atomic_habits_keywords = [
-            "habit", "Atomic Habits", "James Clear", "self-improvement",
-            "routine", "productivity"
-        ]
+        # atomic_habits_keywords = [
+        #     "habit", "Atomic Habits", "James Clear", "self-improvement",
+        #     "routine", "productivity"
+        # ]
         classification_result = pinecone_rag.classify(query_string,
                                                       atomic_habits_keywords)
         classification_label = classification_result.label
@@ -114,7 +173,7 @@ def openai_advanced_chat_completions_route_new():
                 [x['metadata']['text'] for x in res['matches']])
         elif classification_label == "ATOMIC_HABITS":
             context_strings = pinecone_rag.query_pinecone_book(
-                query_string, book_index, top_k=1, namespace='ah-test')
+                query_string, top_k=1, namespace='ah-test')
             book_contexts.extend(context_strings)
 
         # Compose the system message with personalization details and prior interactions.

@@ -16,21 +16,23 @@ client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 logger = logging.getLogger(__name__)
 
 
-def generate_user_uuid(user_name: str, email_address: str) -> str:
+def generate_user_uuid(user_id):
     """
     Generate a unique user ID based on the user's name and email.
     This implementation uses UUID version 5 with a DNS namespace.
     """
     namespace = uuid.NAMESPACE_DNS
-    unique_string = f"{user_name}-{email_address}"
-    return str(uuid.uuid5(namespace, unique_string))
+    unique_string = f"{user_id}"
+    return uuid.uuid5(namespace, unique_string)
+
 
 def generate_streaming_response(data):
     for message in data:
         json_data = message.model_dump_json()
-        logger.info(f"JSON data: {json.dumps(json_data, indent=2)}")
+        # logger.info(f"JSON data: {json.dumps(json_data, indent=2)}")
         yield f"data: {json_data}\n\n"
-        
+
+
 # def generate_streaming_response(chat_completion_stream) -> str:
 #     """
 #     Convert the streaming response from the LLM into a Server-Sent Events (SSE)

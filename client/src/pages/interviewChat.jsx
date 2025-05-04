@@ -14,7 +14,7 @@ export default function InterviewChat() {
   const navigate = useNavigate();
   const { bookId } = useParams();
   const [messages, setMessages] = useState([
-    { text: "Welcome to Colloquial", isUser: false },
+    { text: "Welcome to Lavar", isUser: false },
     { text: "Type in your message.", isUser: false },
   ]);
   const [inputValue, setInputValue] = useState("");

@@ -4,28 +4,34 @@ import { useEffect, useState } from "react";
 import AvatarLogo from "./avatar";
 
 const NavBar = () => {
-  const token = sessionStorage.getItem("access_token") !== null ? sessionStorage.getItem("access_token") : "";
+  const token =
+    sessionStorage.getItem("access_token") !== null
+      ? sessionStorage.getItem("access_token")
+      : "";
   const isAuthenticated = token.length > 10 ? true : false;
-  
+  console.log(token);
 
   useEffect(() => {
     const getUser = async () => {
-      const res = await fetch("https://ec2-100-29-60-61.compute-1.amazonaws.com:5001/user", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/user",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       const data = await res.json();
       if (data.success) {
         setUser(data.user);
       }
     };
-    if (isAuthenticated) getUser()
+    if (isAuthenticated) getUser();
   }, []);
 
-  const [user, setUser] = useState({username:'', picture:'', email: ''});
+  const [user, setUser] = useState({ username: "", picture: "", email: "" });
   const { loginWithRedirect } = useAuth0();
   return (
     <nav className="py-4 px-6 flex justify-between items-center border-b border-gray-200 bg-white w-full">
