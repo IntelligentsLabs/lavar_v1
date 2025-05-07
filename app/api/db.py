@@ -61,3 +61,10 @@ def change_char(changes, user_id):
     else:
         Users.update_one({'_id': objId(user_id)}, {'$set': changes})
     return True
+
+def get_user_id_by_email(email):
+    user = get_user_by_email(email)
+    if user:
+        return str(user["_id"])  # or just return user["_id"] if you want it as an ObjectId
+    return None
+

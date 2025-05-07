@@ -1,201 +1,196 @@
-from pydantic import BaseModel, Field
-from typing import Literal, List, Optional, Dict, Any
+# app/models/conversation_update.py (or similar)
 
+from pydantic import BaseModel, Field, HttpUrl
+from typing import List, Optional, Dict, Any, Union
+# from datetime import datetime # Optional
 
-class Message(BaseModel):
-    role: Literal['system', 'assistant', 'user']
+# --- Primitive/Shared Structures ---
+
+class ConversationEntry(BaseModel):
+    role: str
     content: str
 
-
-class DetailedMessage(BaseModel):
-    role: Literal['system', 'assistant', 'user', 'bot']
+class MessageEntry(BaseModel):
+    role: str
     message: str
-    time: int
-    endTime: Optional[int] = None
-    secondsFromStart: Optional[float] = None
+    time: float
+    end_time: Optional[float] = Field(None, alias='endTime')
+    seconds_from_start: Optional[float] = Field(None, alias='secondsFromStart')
     duration: Optional[float] = None
     source: Optional[str] = None
 
-
-class Artifact(BaseModel):
-    messages: List[DetailedMessage]
-    messagesOpenAIFormatted: List[Message]
-
-
-class Monitor(BaseModel):
-    listenUrl: str
-    controlUrl: str
-
-
-class Transport(BaseModel):
-    assistantVideoEnabled: bool
-
-
-class Call(BaseModel):
-    id: str
-    orgId: str
-    createdAt: str
-    updatedAt: str
+class ParameterProperty(BaseModel):
+    description: Optional[str] = None
     type: str
-    monitor: Monitor
-    transport: Transport
-    webCallUrl: str
-    status: str
-    assistantId: str
-    assistantOverrides: Dict[str, List[str]]
 
+class FunctionParameters(BaseModel):
+    type: str = "object"
+    properties: Dict[str, Union[ParameterProperty, str]]
+    required: Optional[List[str]] = None
+
+class FunctionDefinition(BaseModel):
+    name: str
+    description: str
+    parameters: FunctionParameters
+
+# --- CORRECTED User and Character ---
+class Character(BaseModel):
+    age: int
+    alias: str
+    birthplace: str
+    equipments: List[str]
+    height: str
+    name: str
+    powers: List[str]
+    super_skill: Optional[str] = Field(None, alias='superSkill')
+    weakness: str
+
+class User(BaseModel):
+    username: str
+    email: str
+    id: Optional[str] = None
+    character: Optional[Character]
+    current_bg: Optional[str] = Field(None, alias='currentBg')
+    notifications: Optional[List[Any]] = None # Fixed: Optional
+    picture: Optional[HttpUrl] = None        # Fixed: Optional
+# --- End CORRECTED User ---
+
+class UserDataWrapper(BaseModel):
+    user: User # Uses the corrected User model
+
+class Metadata(BaseModel):
+    token: str
+    data: UserDataWrapper # Uses UserDataWrapper -> User
+
+class ServerConfig(BaseModel):
+    url: HttpUrl
+    timeout_seconds: Optional[int] = Field(None, alias='timeoutSeconds')
+
+class ToolFunction(BaseModel):
+    name: str
+    strict: Optional[bool] = None
+    async_: Optional[bool] = Field(None, alias="async")
+    parameters: FunctionParameters
+    description: str
+
+class Tool(BaseModel):
+    id: str
+    created_at: Optional[str] = Field(None, alias='createdAt')
+    updated_at: Optional[str] = Field(None, alias='updatedAt')
+    type: str
+    function: ToolFunction
+    messages: Optional[List[Any]] = None
+    org_id: Optional[str] = Field(None, alias='orgId')
+    server: ServerConfig
+    async_: bool = Field(..., alias="async")
+
+class KnowledgeBase(BaseModel):
+    file_ids: List[str] = Field(..., alias='fileIds')
+    provider: str
 
 class Voice(BaseModel):
     model: str
-    voiceId: str
+    voice_id: str = Field(..., alias='voiceId')
     provider: str
-    fillerInjectionEnabled: bool
+    input_min_characters: int = Field(..., alias='inputMinCharacters')
+    input_punctuation_boundaries: List[str] = Field(..., alias='inputPunctuationBoundaries')
 
-
-class Model(BaseModel):
-    url: str
+class Transcriber(BaseModel):
     model: str
-    toolIds: List[str]
-    messages: List[Message]
+    language: str
+    numerals: bool
     provider: str
-    temperature: float
-    emotionRecognitionEnabled: bool
-    tools: List[Dict[str, Any]]
+    confidence_threshold: float = Field(..., alias='confidenceThreshold')
 
+class ModelOverrides(BaseModel):
+    model: str
+    messages: List[ConversationEntry]
+    functions: List[FunctionDefinition]
+    provider: str
+    url: HttpUrl
 
-class Assistant(BaseModel):
+class AssistantModelConfig(BaseModel):
+    url: HttpUrl
+    model: str
+    tool_ids: Optional[List[str]] = Field(None, alias='toolIds')
+    messages: List[ConversationEntry]
+    provider: str
+    max_tokens: Optional[int] = Field(None, alias='maxTokens')
+    temperature: Optional[float] = None
+    knowledge_base: Optional[KnowledgeBase] = Field(None, alias='knowledgeBase')
+    tools: Optional[List[Tool]] = None
+    functions: List[FunctionDefinition]
+
+class Monitor(BaseModel):
+    listen_url: str = Field(..., alias='listenUrl') # Allow wss://
+    control_url: str = Field(..., alias='controlUrl') # Allow wss:// or https://
+
+class Transport(BaseModel):
+    provider: str
+    assistant_video_enabled: bool = Field(..., alias='assistantVideoEnabled')
+
+class AssistantOverrides(BaseModel):
+    name: str
+    model: ModelOverrides
+    first_message: str = Field(..., alias='firstMessage')
+    metadata: Metadata # Uses Metadata -> UserDataWrapper -> User (Corrected)
+
+class CallData(BaseModel):
     id: str
-    orgId: str
+    org_id: Optional[str] = Field(None, alias='orgId')
+    created_at: Optional[str] = Field(None, alias='createdAt')
+    updated_at: Optional[str] = Field(None, alias='updatedAt')
+    type: str
+    monitor: Monitor
+    transport: Transport
+    web_call_url: Optional[HttpUrl] = Field(None, alias='webCallUrl')
+    status: str
+    assistant_id: Optional[str] = Field(None, alias='assistantId')
+    assistant_overrides: Optional[AssistantOverrides] = Field(None, alias='assistantOverrides') # Uses AssistantOverrides -> Metadata -> User (Corrected)
+
+class AssistantData(BaseModel):
+    id: str
+    org_id: Optional[str] = Field(None, alias='orgId')
     name: str
     voice: Voice
-    createdAt: str
-    updatedAt: str
-    model: Model
+    created_at: Optional[str] = Field(None, alias='createdAt')
+    updated_at: Optional[str] = Field(None, alias='updatedAt')
+    model: AssistantModelConfig
+    recording_enabled: Optional[bool] = Field(None, alias='recordingEnabled')
+    first_message: Optional[str] = Field(None, alias='firstMessage')
+    end_call_function_enabled: Optional[bool] = Field(None, alias='endCallFunctionEnabled')
+    transcriber: Transcriber
+    silence_timeout_seconds: Optional[int] = Field(None, alias='silenceTimeoutSeconds')
+    client_messages: Optional[List[str]] = Field(None, alias='clientMessages')
+    server_messages: Optional[List[str]] = Field(None, alias='serverMessages')
+    dial_keypad_function_enabled: Optional[bool] = Field(None, alias='dialKeypadFunctionEnabled')
+    hipaa_enabled: Optional[bool] = Field(None, alias='hipaaEnabled')
+    max_duration_seconds: Optional[int] = Field(None, alias='maxDurationSeconds')
+    metadata: Metadata # Uses Metadata -> UserDataWrapper -> User (Corrected)
+    voicemail_detection_enabled: Optional[bool] = Field(None, alias='voicemailDetectionEnabled')
+    background_sound: Optional[str] = Field(None, alias='backgroundSound')
+    backchanneling_enabled: Optional[bool] = Field(None, alias='backchannelingEnabled')
+    background_denoising_enabled: Optional[bool] = Field(None, alias='backgroundDenoisingEnabled')
+    server: ServerConfig
 
+class Artifact(BaseModel):
+    messages: List[MessageEntry] # MessageEntry already adjusted
+    messages_open_a_i_formatted: Optional[List[ConversationEntry]] = Field(None, alias='messagesOpenAiFormatted')
 
+# --- Top-Level Model ---
 class ConversationUpdate(BaseModel):
+    """The root model representing the entire conversation update event payload."""
     timestamp: int
-    type: Literal['conversation-update']
-    conversation: List[Message]
-    messages: List[DetailedMessage]
+    type: str = "conversation-update"
+    conversation: List[ConversationEntry]
+    messages: List[MessageEntry]
+    messages_open_a_i_formatted: Optional[List[ConversationEntry]] = Field(None, alias='messagesOpenAiFormatted')
     artifact: Artifact
-    call: Call
-    assistant: Assistant
+    call: CallData # Uses updated CallData
+    assistant: AssistantData # Uses updated AssistantData
 
-
-# Example usage
-# if __name__ == "__main__":
-#     payload = {
-#         "timestamp": 1735448156783,
-#         "type": "conversation-update",
-#         "conversation": [
-#             {"role": "system", "content": "You are a Personal Learning and Implementation Assistant..."},
-#             {"role": "assistant", "content": "Hi there."},
-#             {"role": "user", "content": "Hi."},
-#             {"role": "assistant", "content": "How are you today?"}
-#         ],
-#         "messages": [
-#             {
-#                 "role": "system",
-#                 "message": "You are a Personal Learning and Implementation Assistant with specialized knowledge of Atomic Habits...",
-#                 "time": 1735448123681,
-#                 "secondsFromStart": 0
-#             },
-#             {
-#                 "role": "assistant",
-#                 "message": "Hi there.",
-#                 "time": 1735448125093,
-#                 "endTime": 1735448125753,
-#                 "secondsFromStart": 1.2,
-#                 "duration": 660,
-#                 "source": ""
-#             },
-#             {
-#                 "role": "user",
-#                 "message": "Hi.",
-#                 "time": 1735448126613,
-#                 "endTime": 1735448127113,
-#                 "secondsFromStart": 2.7,
-#                 "duration": 500
-#             }
-#         ],
-#         "artifact": {
-#             "messages": [
-#                 {
-#                     "role": "system",
-#                     "message": "You are a Personal Learning and Implementation Assistant with specialized knowledge of Atomic Habits...",
-#                     "time": 1735448123681,
-#                     "secondsFromStart": 0
-#                 },
-#                 {
-#                     "role": "assistant",
-#                     "message": "Hi there.",
-#                     "time": 1735448125093,
-#                     "endTime": 1735448125753,
-#                     "secondsFromStart": 1.2,
-#                     "duration": 660,
-#                     "source": ""
-#                 },
-#                 {
-#                     "role": "user",
-#                     "message": "Hi.",
-#                     "time": 1735448126613,
-#                     "endTime": 1735448127113,
-#                     "secondsFromStart": 2.7,
-#                     "duration": 500
-#                 }
-#             ],
-#             "messagesOpenAIFormatted": [
-#                 {"role": "system", "content": "You are a Personal Learning and Implementation Assistant..."},
-#                 {"role": "assistant", "content": "Hi there."},
-#                 {"role": "user", "content": "Hi."}
-#             ]
-#         },
-#         "call": {
-#             "id": "1e9893d4-d71b-455f-aad0-7ac54c58e5f4",
-#             "orgId": "bf389f00-a6ab-4e59-b031-fb09510545d1",
-#             "createdAt": "2024-12-29T04:55:22.615Z",
-#             "updatedAt": "2024-12-29T04:55:22.615Z",
-#             "type": "webCall",
-#             "monitor": {
-#                 "listenUrl": "wss://phone-call-websocket.aws-us-west-2-backend-production2.vapi.ai/1e9893d4-d71b-455f-aad0-7ac54c58e5f4/listen",
-#                 "controlUrl": "https://phone-call-websocket.aws-us-west-2-backend-production2.vapi.ai/1e9893d4-d71b-455f-aad0-7ac54c58e5f4/control"
-#             },
-#             "transport": {"assistantVideoEnabled": False},
-#             "webCallUrl": "https://vapi.daily.co/d4U8OXMj9EiDwFsKqMyC",
-#             "status": "queued",
-#             "assistantId": "b33d016a-db85-4e34-801b-5f7a175a077e",
-#             "assistantOverrides": {"clientMessages": ["transfer-update", "transcript"]}
-#         },
-#         "assistant": {
-#             "id": "b33d016a-db85-4e34-801b-5f7a175a077e",
-#             "orgId": "bf389f00-a6ab-4e59-b031-fb09510545d1",
-#             "name": "Groq Custom LLM Webhook",
-#             "voice": {
-#                 "model": "sonic-english",
-#                 "voiceId": "248be419-c632-4f23-adf1-5324ed7dbf1d",
-#                 "provider": "cartesia",
-#                 "fillerInjectionEnabled": False
-#             },
-#             "createdAt": "2024-12-23T21:02:04.662Z",
-#             "updatedAt": "2024-12-29T04:55:12.518Z",
-#             "model": {
-#                 "url": "https://remotely-trusty-sole.ngrok-free.app/api/custom-llm/",
-#                 "model": "gpt-3.5-turbo",
-#                 "toolIds": ["14b85a80-946c-4f66-a123-b2b557a6b7af"],
-#                 "messages": [{"role": "system", "content": "You are a Personal Learning and Implementation Assistant..."}],
-#                 "provider": "custom-llm",
-#                 "temperature": 0.7,
-#                 "emotionRecognitionEnabled": True,
-#                 "tools": [{"id": "14b85a80-946c-4f66-a123-b2b557a6b7af"}]
-#             }
-#         }
-#     }
-
-#     try:
-#         validated_payload = ConversationUpdate.model_validate(payload)
-#         print("Validation successful! Here is the parsed object:")
-#         print(validated_payload.model_dump_json(indent=4))
-#     except Exception as e:
-#         print("Validation failed with error:", e)
-
+    class Config:
+        # If you prefer automatic camelCase to snake_case conversion
+        # alias_generator = lambda field_name: ''.join(word.capitalize() for word in field_name.split('_'))
+        # populate_by_name = True # For Pydantic v2+ when using alias_generator
+        pass

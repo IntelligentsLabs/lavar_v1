@@ -1,113 +1,197 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field, HttpUrl
+from typing import List, Optional, Dict, Any, Literal, Union
 from datetime import datetime
+
 
 class Message(BaseModel):
     role: str
     message: Optional[str] = None
-    time: int
-    endTime: Optional[int] = None
-    secondsFromStart: float
-    duration: Optional[int] = None
-    source: Optional[str] = None
     content: Optional[str] = None
+    time: Optional[int] = None
+    secondsFromStart: Optional[int] = None
 
-class OpenAIMessage(BaseModel):
-    role: str
-    content: str
 
-class FunctionParameter(BaseModel):
-    type: str
-    description: str
+class Artifact(BaseModel):
+    messages: List[Message]
+    messagesOpenAIFormatted: List[Message]
 
-class FunctionParameters(BaseModel):
-    type: str
-    required: Optional[List[str]] = None
-    properties: Dict[str, FunctionParameter]
 
-class Function(BaseModel):
+class Monitor(BaseModel):
+    listenUrl: HttpUrl
+    controlUrl: HttpUrl
+
+
+class Transport(BaseModel):
+    provider: str
+    assistantVideoEnabled: bool
+
+
+class Character(BaseModel):
+    age: int
+    alias: str
+    birthplace: str
+    equipments: List[str]
+    height: str
     name: str
-    async_: bool = False
-    parameters: FunctionParameters
-    description: str
+    powers: List[str]
+    super_skill: str
+    weakness: str
 
-class Tool(BaseModel):
-    id: str
-    createdAt: datetime
-    updatedAt: datetime
-    type: str
-    function: Function
-    orgId: str
-    server: Dict[str, str]
-    async_: bool = Field(alias="async")
+
+class User(BaseModel):
+    username: str
+    email: str
+    _id: str
+    character: Character
+    current_bg: str
+    notifications: List
+    picture: HttpUrl
+
+
+class MetadataData(BaseModel):
+    user: User
+
+
+class Metadata(BaseModel):
+    token: str
+    data: MetadataData
+
+
+class Transcriber(BaseModel):
+    provider: str
+    model: str
+    language: str
+
 
 class ModelConfig(BaseModel):
-    url: str
+    provider: str
+    model: str
+    url: HttpUrl
+
+
+class VoiceConfig(BaseModel):
+    provider: str
+    voiceId: str
+
+
+class AssistantOverrides(BaseModel):
+    name: str
+    transcriber: Transcriber
+    model: ModelConfig
+    voice: VoiceConfig
+    firstMessage: str
+    metadata: Metadata
+
+
+class Call(BaseModel):
+    id: str
+    orgId: str
+    createdAt: str
+    updatedAt: str
+    type: str
+    monitor: Monitor
+    transport: Transport
+    webCallUrl: HttpUrl
+    status: str
+    assistantId: str
+    assistantOverrides: AssistantOverrides
+
+
+class ParameterProperty(BaseModel):
+    type: str
+    description: str
+    items: Optional[dict] = None
+
+
+class Parameters(BaseModel):
+    type: str
+    required: List[str]
+    properties: dict
+
+
+class FunctionDetails(BaseModel):
+    name: str
+    async_: Optional[bool] = Field(default=False, alias="async")
+    strict: Optional[bool] = None
+    parameters: Parameters
+    description: str
+
+
+class FunctionTool(BaseModel):
+    id: str
+    createdAt: str
+    updatedAt: str
+    type: Literal["function"]
+    function: FunctionDetails
+    messages: List = []
+    orgId: str
+    server: dict
+    async_: Optional[bool] = Field(default=False, alias="async")
+
+
+class KnowledgeBase(BaseModel):
+    fileIds: List[str]
+    provider: str
+
+
+class AssistantModel(BaseModel):
+    url: HttpUrl
     model: str
     toolIds: List[str]
-    messages: List[OpenAIMessage]
+    messages: List[Message]
     provider: str
+    maxTokens: int
     temperature: float
-    emotionRecognitionEnabled: bool
-    tools: List[Tool]
+    knowledgeBase: KnowledgeBase
+    tools: List[FunctionTool]
 
-class Voice(BaseModel):
+
+class TranscriberConfig(BaseModel):
     model: str
-    voiceId: str
+    language: str
+    numerals: bool
     provider: str
-    fillerInjectionEnabled: bool
+    confidenceThreshold: float
+
+
+class ServerConfig(BaseModel):
+    url: HttpUrl
+    timeoutSeconds: int
+
 
 class Assistant(BaseModel):
     id: str
     orgId: str
     name: str
-    voice: Voice
-    createdAt: datetime
-    updatedAt: datetime
-    model: ModelConfig
+    voice: VoiceConfig
+    createdAt: str
+    updatedAt: str
+    model: AssistantModel
+    recordingEnabled: bool
     firstMessage: str
-    transcriber: Dict[str, str]
+    endCallFunctionEnabled: bool
+    transcriber: TranscriberConfig
     silenceTimeoutSeconds: int
     clientMessages: List[str]
     serverMessages: List[str]
-    serverUrl: str
+    dialKeypadFunctionEnabled: bool
+    serverUrl: HttpUrl
+    hipaaEnabled: bool
     maxDurationSeconds: int
-    metadata: Dict[str, str]
+    metadata: Metadata
+    voicemailDetectionEnabled: bool
     backgroundSound: str
     backchannelingEnabled: bool
     backgroundDenoisingEnabled: bool
-    messagePlan: Dict[str, List[str]]
-    startSpeakingPlan: Dict[str, bool]
+    server: ServerConfig
 
-class Monitor(BaseModel):
-    listenUrl: str
-    controlUrl: str
-
-class Transport(BaseModel):
-    assistantVideoEnabled: bool
-
-class Call(BaseModel):
-    id: str
-    orgId: str
-    createdAt: datetime
-    updatedAt: datetime
-    type: str
-    monitor: Monitor
-    transport: Transport
-    webCallUrl: str
-    status: str
-    assistantId: str
-    assistantOverrides: Dict[str, List[str]]
-
-class Artifact(BaseModel):
-    messages: List[Message]
-    messagesOpenAIFormatted: List[OpenAIMessage]
 
 class SpeechUpdate(BaseModel):
     timestamp: int
     type: str
     status: str
     role: str
+    turn: int
     artifact: Artifact
     call: Call
     assistant: Assistant
