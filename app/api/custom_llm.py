@@ -103,138 +103,83 @@ DEFAULT_PREFERENCES = {
 @custom_llm.route('/token', methods=['POST'])
 def generate_token():
     """
-    Authenticates user via email/username, creates user in Supabase if needed,
-    fetches/caches preferences using Flask-Caching via current_app.extensions,
-    and returns JWT token containing the Supabase User UUID as identity.
+    Gets user info from request, ensures user exists in Supabase (creates/updates profile),
+    caches preferences, and returns JWT token with Supabase UUID.
     """
-    username = request.json.get('username')
+    # --- Extract ALL relevant fields from request ---
+    username = request.json.get('username') # Derived from given_name/name etc. in frontend
     email = request.json.get('email')
     picture = request.json.get('picture')
+    first_name = request.json.get('first_name')
+    last_name = request.json.get('last_name')
+    email_verified = request.json.get('email_verified')
+    auth0_sub = request.json.get('auth0_sub') # Optional Auth0 ID
+    # --- End Extraction ---
 
     if not email or not username:
         logger.warning("Token request missing username or email.")
         return jsonify({"error": "Username and email are required."}), 400
 
-    # --- Debugging and Accessing Cache ---
-    logger.debug("--- Debugging Cache Access in /token ---")
-    cache_instance = None # Initialize to None
-    if current_app:
-        logger.debug(f"current_app object: {current_app}")
-        if hasattr(current_app, 'extensions'):
-            logger.debug(f"Keys in current_app.extensions: {list(current_app.extensions.keys())}")
-            # Use .get() for safe access
-            cache_instance = current_app.extensions.get('cache')
-            logger.debug(f"Value from current_app.extensions.get('cache'): {cache_instance}")
-            logger.debug(f"Type of value: {type(cache_instance)}")
-            logger.debug(f"Does it have '.set'?: {hasattr(cache_instance, 'set')}")
-        else:
-            logger.error("current_app does NOT have 'extensions' attribute!")
-    else:
-        logger.error("current_app proxy is not available!")
-
-    if not cache_instance or not hasattr(cache_instance, 'set'):
-        logger.warning("Cache object not found or invalid in /token. Proceeding without caching.")
-        cache_instance = None # Ensure it's None if invalid
-    logger.debug("--- End Debugging Cache ---")
-    # --- End Debugging ---
+    cache = current_app.extensions.get('cache')
+    if not cache: logger.warning("Cache unavailable in /token. Proceeding without caching.")
 
     supabase_user_id = None
     try:
-        # Check if user exists using the correct Supabase function
-        user_exists = check_if_user_exists(email)
-
-        if not user_exists:
-            # User doesn't exist in Supabase, create them
-            logger.info(f"User {email} not found in Supabase. Creating...")
-            user_details = {
-                'username': username, 'email': email, 'picture': picture,
-                'current_bg': 'black', # Default setting for new profile
-                'character': { # Default character structure for new profile
-                    'name': '', 'alias': '', 'super_skill': None, 'weakness': '',
-                    'powers': [], 'equipments': [], 'height': '', 'age': 0,
-                    'birthplace': ''
-                }
-                # Password handled internally by create_supabase_user with placeholder
+        # Prepare details dict to pass to db function
+        user_details = {
+            'username': username,
+            'email': email,
+            'picture': picture,
+            'first_name': first_name,
+            'last_name': last_name,
+            'email_verified': email_verified,
+            'auth0_sub': auth0_sub,
+            # Include defaults for profile fields IF creating for first time
+            # create_supabase_user handles defaults internally now for profile part
+            'current_bg': 'black',
+            'character': {
+                 'name': '', 'alias': '', 'super_skill': None, 'weakness': '',
+                 'powers': [], 'equipments': [], 'height': '', 'age': 0,
+                 'birthplace': ''
             }
-            supabase_user_id = create_supabase_user(user_details) # Uses Supabase create
-            if not supabase_user_id:
-                # create_supabase_user logs specific errors
-                return jsonify({"error": "User creation failed."}), 500
-            logger.info(f"Created Supabase user {email} with ID: {supabase_user_id}")
+        }
 
-            # Fetch prefs for the newly created user directly from DB
-            user_prefs = get_user_preferences_from_db(supabase_user_id)
+        # Check existence and create/update user and profile in one go
+        # create_supabase_user now handles both cases:
+        # - If user doesn't exist -> Creates user, creates profile, returns NEW ID
+        # - If user exists -> Updates user (if needed), updates profile (upsert), returns EXISTING ID
+        supabase_user_id = create_supabase_user(user_details)
 
-            # Cache the retrieved prefs (or defaults) if cache is available
-            if cache_instance: # Use the validated instance
-                cache_key = f"user_prefs_{supabase_user_id}"
-                try:
-                    # Use defaults if DB fetch returned None/empty
-                    cache_instance.set(cache_key, user_prefs or DEFAULT_PREFERENCES)
-                    logger.info(f"Cached preferences for new user {supabase_user_id}.")
-                except AttributeError as ae:
-                     # This is the error we are trying to catch - log which object failed
-                     logger.error(f"AttributeError trying to cache for new user. Cache object type: {type(cache_instance)}. Error: {ae}", exc_info=True)
-                except Exception as cache_err:
-                    logger.error(f"Failed to set cache for new user {supabase_user_id}: {cache_err}", exc_info=True)
-
-        else:
-            # User exists, get their Supabase ID
-            supabase_user_id = get_supabase_user_id_by_email(email)
-            if not supabase_user_id:
-                 logger.error(f"User {email} exists but failed to retrieve Supabase ID.")
-                 return jsonify({"error": "Failed to retrieve existing user ID."}), 500
-            logger.info(f"Found existing Supabase user {email} with ID: {supabase_user_id}")
-
-            # --- Fetch and Cache Preferences for existing user ---
-            user_prefs = None
-            cache_key = f"user_prefs_{supabase_user_id}"
-            if cache_instance: # Check cache only if it's available
-                try:
-                    user_prefs = cache_instance.get(cache_key)
-                    if user_prefs is not None:
-                        logger.info(f"Preferences cache hit for user {supabase_user_id}.")
-                except AttributeError as ae:
-                    logger.error(f"AttributeError trying to get cache for existing user. Cache object type: {type(cache_instance)}. Error: {ae}", exc_info=True)
-                    user_prefs = None # Treat as miss on error
-                except Exception as cache_err:
-                    logger.error(f"Error getting from cache for user {supabase_user_id}: {cache_err}", exc_info=True)
-                    user_prefs = None # Treat cache error as a miss
-
-            if user_prefs is None: # If cache missed or cache failed/unavailable
-                log_msg = f"Preferences cache MISS for user {supabase_user_id}."
-                if not cache_instance: log_msg = "Cache unavailable."
-                logger.info(f"{log_msg} Fetching from DB.")
-
-                user_prefs = get_user_preferences_from_db(supabase_user_id) # Fetch from DB
-                if cache_instance and user_prefs is not None: # Cache only if cache exists and fetch returned something usable
-                    try:
-                        # Cache the retrieved prefs OR the defaults if DB returned nothing/error
-                        cache_instance.set(cache_key, user_prefs or DEFAULT_PREFERENCES) # THE LINE THAT ERRORED BEFORE
-                        logger.info(f"Cached preferences for existing user {supabase_user_id}.")
-                    except AttributeError as ae:
-                         # Log the specific error again if it happens here
-                         logger.error(f"AttributeError trying to set cache for existing user. Cache object type: {type(cache_instance)}. Error: {ae}", exc_info=True)
-                    except Exception as cache_err:
-                         logger.error(f"Error setting cache for existing user {supabase_user_id}: {cache_err}", exc_info=True)
-                elif not user_prefs:
-                     logger.warning(f"Failed to fetch preferences for user {supabase_user_id}. Defaults will be used if needed.")
-            # --- End Fetch and Cache ---
-
-        # Ensure supabase_user_id was set before creating token
         if not supabase_user_id:
-             logger.error("Failed to determine Supabase user ID before token creation.")
-             return jsonify({"error": "User identification failed."}), 500
+            # create_supabase_user logs specific reasons (duplicate username/email, DB error)
+            logger.error(f"Failed to get or create Supabase user for {email}.")
+            return jsonify({"error": "User processing failed."}), 500
+        logger.info(f" Ensured Supabase user exists for {email} with ID: {supabase_user_id}")
 
-        # Create the access token with the Supabase UUID as the identity
+        # --- Fetch and Cache Preferences ---
+        user_prefs = None
+        cache_key = f"user_prefs_{supabase_user_id}"
+        if cache:
+            try: user_prefs = cache.get(cache_key)
+            except Exception as ce: logger.error(f"Cache get failed: {ce}"); user_prefs = None
+
+        if user_prefs is None:
+            logger.info(f"Cache miss/unavailable for {supabase_user_id}. Fetching prefs.")
+            user_prefs = get_user_preferences_from_db(supabase_user_id)
+            if cache and user_prefs is not None:
+                try: cache.set(cache_key, user_prefs or DEFAULT_PREFERENCES)
+                except Exception as ce: logger.error(f"Cache set failed: {ce}")
+            elif not user_prefs: logger.warning(f"DB pref fetch failed for {supabase_user_id}.")
+        else: logger.info(f"Cache hit for {supabase_user_id}.")
+        # --- End Fetch and Cache ---
+
+        # Create the access token using the retrieved/created Supabase UUID
         access_token = create_access_token(identity=supabase_user_id)
-        logger.debug(f"Generated access token for Supabase user ID: {supabase_user_id}")
         return jsonify(access_token=access_token, success=True)
 
     except Exception as e:
-         # Log the specific exception
-         logger.error(f"Unexpected error during token generation for {email}: {e}", exc_info=True)
-         return jsonify({"error": "Token generation failed due to an internal server error."}), 500
+         logger.error(f"Token generation error for {email}: {e}", exc_info=True)
+         return jsonify({"error": "Token generation failed."}), 500
 # ==============================================================================
 
 # ==============================================================================

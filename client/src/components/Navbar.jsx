@@ -10,7 +10,6 @@ const NavBar = () => {
       : "";
   const isAuthenticated = token.length > 10 ? true : false;
   console.log(token);
-
   useEffect(() => {
     const getUser = async () => {
       const res = await fetch(
@@ -29,7 +28,7 @@ const NavBar = () => {
       }
     };
     if (isAuthenticated) getUser();
-  }, []);
+  }, [isAuthenticated,token]);
 
   const [user, setUser] = useState({ username: "", picture: "", email: "" });
   const { loginWithRedirect } = useAuth0();
