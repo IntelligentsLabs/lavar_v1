@@ -142,7 +142,7 @@ const VoiceButton = ({ func }) => {
 };
 
 function addUserName(user) {
-  console.log("************THIS IS THE USER************",user)
+  console.log("************THIS IS THE USER************", user);
   const token = sessionStorage.getItem("access_token");
   return {
     name: "Mary",
@@ -158,7 +158,7 @@ function addUserName(user) {
       },
     },
     model: {
-      model: "gpt-4o",
+      model: "gpt-4.1-nano-2025-04-14",
       provider: "custom-llm",
       url: "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/chat/completions",
       messages: [

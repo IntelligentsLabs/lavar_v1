@@ -309,8 +309,8 @@ def update_user_character():
 @custom_llm.route('/chat/completions', methods=['POST'])
 def openai_advanced_chat_completions_route_new():
     """
-    Handle POST requests for OpenAI chat completions, incorporating user context,
-    preferences (cached), RAG results, and streaming capability.
+    Handle POST requests from Vapi (structured like OpenAI API + call/assistant info)
+    for chat completions with personalization and RAG.
     Logs detailed information about the LLM request context.
     """
     logger.info("Received request for /chat/completions")
@@ -319,52 +319,73 @@ def openai_advanced_chat_completions_route_new():
         logger.error("No JSON data provided in chat request.")
         return jsonify({"error": "No JSON data provided"}), 400
 
-    # --- Metadata and Authentication ---
-    # Extract data assuming OpenAI-like structure + metadata Vapi sends
-    messages_from_request = request_data.get("messages", [])
-    tools_from_request = request_data.get("tools")
-    model_name_from_request = request_data.get("model", "gpt-4o")
-    stream_flag = request_data.get("stream", True)
-    temperature_from_request = request_data.get("temperature", 0.7)
-    max_tokens_from_request = request_data.get("max_tokens")
+    # --- Extract data assuming Vapi sends OpenAI-like structure for main LLM call ---
+    # and additional Vapi-specific context in 'call' and 'metadata' (passed by you).
+    messages_from_vapi_request = request_data.get("messages", [])
+    tools_from_vapi_request = request_data.get("tools")
+    model_name_from_vapi_request = request_data.get("model", "gpt-4o") # Model requested by Vapi for this turn
+    stream_flag_from_vapi_request = request_data.get("stream", True)
+    temperature_from_vapi_request = request_data.get("temperature", 0.7)
+    max_tokens_from_vapi_request = request_data.get("max_tokens")
 
-    # Extract call_id and token from the 'call.assistantOverrides.metadata' structure
+    # --- Extract Vapi Call ID and Your Custom Metadata (including JWT Token) ---
     token = None
     call_id = None
-    try:
-        call_object = request_data.get("call", {})
-        if isinstance(call_object, dict):
-            call_id = call_object.get("id")
-            assistant_overrides = call_object.get("assistantOverrides", {})
-            if isinstance(assistant_overrides, dict):
-                metadata_object = assistant_overrides.get("metadata", {})
-                if isinstance(metadata_object, dict):
-                    token = metadata_object.get("token")
-    except Exception as e:
-        logger.error(f"Error parsing call_id or token from request_data: {e}", exc_info=True)
+    user_data_from_vapi_metadata = {} # Store user data from Vapi metadata if needed
+
+    # The Vapi request payload (as printed) shows 'call' and 'metadata' at the top level.
+    # Your custom token and user data seem to be nested within call.assistantOverrides.metadata
+    # AND also potentially at request_data.metadata (from your Vapi assistant setup).
+    # Let's prioritize the one from request_data.metadata if you set it up.
+    # If not, we try the one nested under request_data.call.assistantOverrides.metadata.
+
+    top_level_metadata = request_data.get("metadata", {})
+    if isinstance(top_level_metadata, dict):
+        token = top_level_metadata.get("token")
+        call_id = top_level_metadata.get("call_id") # Assuming you pass call_id in top-level metadata
+        user_data_from_vapi_metadata = top_level_metadata.get("data", {}).get("user", {})
+
+
+    # Fallback or primary: Check within the 'call' object structure Vapi sends
+    if not call_id: # If not found in top-level metadata
+        call_object_from_vapi = request_data.get("call", {})
+        if isinstance(call_object_from_vapi, dict):
+            call_id = call_object_from_vapi.get("id")
+            if not token: # If token wasn't in top-level metadata
+                try:
+                    token = call_object_from_vapi.get("assistantOverrides", {}) \
+                                                .get("metadata", {}) \
+                                                .get("token")
+                    if not user_data_from_vapi_metadata: # If user data wasn't in top-level metadata
+                         user_data_from_vapi_metadata = call_object_from_vapi.get("assistantOverrides", {}) \
+                                                                    .get("metadata", {}) \
+                                                                    .get("data", {}).get("user", {})
+                except AttributeError:
+                    logger.warning("Error accessing token/user_data from call.assistantOverrides.metadata")
+
 
     if not call_id:
-        logger.error("'call.id' not found in request payload.")
+        logger.error("'call_id' not found in request payload or expected metadata.")
         logger.debug(f"Received request keys for /chat/completions: {list(request_data.keys())}")
-        return jsonify({"error": "call_id is required in the request payload."}), 400
+        return jsonify({"error": "call_id is required."}), 400
     if not token:
-        logger.warning("JWT token not found in request payload at call.assistantOverrides.metadata.token.")
-        return jsonify({"error": "Authentication token not found in expected location."}), 401
+        logger.warning("JWT token not found in request payload.")
+        return jsonify({"error": "Authentication token not found."}), 401
 
-    # Access cache via Flask's application context's extensions registry
+    # Access cache
     cache = current_app.extensions.get('cache')
     if not cache:
-        logger.warning("Cache unavailable in /chat/completions (current_app.extensions['cache'] is None). Proceeding without preference caching.")
+        logger.warning("Cache unavailable in /chat/completions. Proceeding without preference caching for this request.")
 
     try:
         # Decode token to get Supabase User UUID
         decoded = decode_token(token)
-        user_id = decoded['sub'] # This is the Supabase UUID string
+        user_id = decoded['sub'] # Supabase UUID string
         logger.info(f"Authenticated Supabase user ID for chat: {user_id}")
     except Exception as e:
         logger.error(f"Invalid JWT provided in chat request: {str(e)}")
         return jsonify({"error": "Invalid or expired token."}), 401
-    # --- End Authentication ---
+    # --- End Authentication & Core Data Extraction ---
 
     try:
         # --- Generate Session Hash ---
@@ -380,7 +401,7 @@ def openai_advanced_chat_completions_route_new():
             llm_context = get_llm_context_from_session(session_id_hash, max_turns=5)
         except Exception as context_err:
             logger.error(f"Error fetching LLM context for session {session_id_hash}: {context_err}", exc_info=True)
-            llm_context = "Error retrieving past interactions." # Fallback
+            llm_context = "Error retrieving past interactions."
 
         user_preferences = None
         cache_key = f"user_prefs_{user_id}"
@@ -390,12 +411,11 @@ def openai_advanced_chat_completions_route_new():
                 if user_preferences is not None: logger.info(f"Preferences cache HIT for {user_id}")
             except Exception as cache_err:
                 logger.error(f"Error getting from cache for user {user_id}: {cache_err}")
-                user_preferences = None # Treat as miss
+                user_preferences = None
 
         if user_preferences is None:
-            log_msg = f"Preferences cache MISS for user {user_id}."
-            if not cache: log_msg = "Cache unavailable."
-            logger.info(f"{log_msg} Fetching fallback.")
+            log_msg = f"Preferences cache MISS for user {user_id}." if cache else "Cache unavailable."
+            logger.info(f"{log_msg} Fetching fallback from DB.")
             user_preferences = get_user_preferences_from_db(user_id)
             if cache and user_preferences is not None:
                  try:
@@ -405,21 +425,27 @@ def openai_advanced_chat_completions_route_new():
             elif not user_preferences: logger.warning(f"Fallback preference fetch failed for user {user_id}. Using defaults.")
 
         user_preferences = user_preferences or DEFAULT_PREFERENCES
-        logger.debug(f"Using preferences for chat: {user_preferences}")
+        logger.info(f"Using preferences for chat: {user_preferences}")
         # --- End Context/Preferences Retrieval ---
 
         # --- Process Messages & RAG ---
-        if not messages_from_request: return jsonify({"error": "Messages field required."}), 400
-        last_message_from_request = messages_from_request[-1]
-        query_string = last_message_from_request.get('content', '') if isinstance(last_message_from_request, dict) else ''
-        if not query_string: return jsonify({"error": "Last message has no content or is malformed."}), 400
+        if not messages_from_vapi_request: return jsonify({"error": "Messages field required."}), 400
+        last_message_from_vapi = messages_from_vapi_request[-1]
+        query_string = last_message_from_vapi.get('content', '') if isinstance(last_message_from_vapi, dict) else ''
+        if not query_string and not last_message_from_vapi.get('tool_calls'): # Query can be empty if it's an assistant turn with tool_calls
+             if not any(msg.get('tool_calls') for msg in messages_from_vapi_request if isinstance(msg, dict)): # Check if any message has tool_calls
+                logger.warning("Last message has no content and no tool_calls found in history.")
+                # Allow proceeding if there are tool_calls in the history Vapi sent
+            # If it's a user message with no content, it might be an error state from Vapi or an empty user utterance
+            # else: return jsonify({"error": "Last user message has no content."}), 400
 
-        if query_string.lower() in ["help", "what can i ask?"]:
+
+        if query_string and query_string.lower() in ["help", "what can i ask?"]: # Handle help request
             assistance_text = provide_interaction_assistance()
             return Response(generate_streaming_introduction(assistance_text), content_type='text/event-stream')
 
         book_contexts = []
-        if user_index and book_index and atomic_habits_keywords:
+        if user_index and book_index and atomic_habits_keywords and query_string: # RAG only if there's a query string
             try:
                 classification_result = pinecone_rag.classify(query_string, atomic_habits_keywords)
                 classification_label = classification_result.label
@@ -434,6 +460,8 @@ def openai_advanced_chat_completions_route_new():
             except Exception as rag_e:
                 logger.error(f"Error during RAG query: {rag_e}", exc_info=True)
                 book_contexts = []
+        elif not query_string:
+            logger.info("No query string for RAG (likely an assistant turn with tool_calls or tool_response). Skipping RAG.")
         else:
             logger.warning("RAG components not available. Skipping RAG query.")
         # --- End Process Messages & RAG ---
@@ -450,333 +478,109 @@ def openai_advanced_chat_completions_route_new():
         except TypeError:
             logger.warning("Could not serialize user preferences to JSON. Using raw dict string.")
             prefs_json = str(user_preferences)
-            
-        system_message_content_with_prefs = f"{base_system_prompt}\nUser Preferences: {prefs_json}"
+        system_message_with_prefs = {"role": "system", "content": f"{base_system_prompt}\nUser Preferences: {prefs_json}"}
 
         # Build conversation history for LLM
-        # Start with the system prompt containing preferences
-        conversation_for_llm = [{"role": "system", "content": system_message_content_with_prefs}]
+        conversation_for_llm = [system_message_with_prefs]
 
-        # Add message history from request, ensuring structure is correct
-        valid_messages = [msg for msg in messages_from_request if isinstance(msg, dict) and 'role' in msg and 'content' in msg]
-        conversation_for_llm.extend(valid_messages)
-
-        # Combine and potentially truncate RAG + LLM history context
+        # RAG and LLM History Context (from Letta/Supabase)
         all_context_parts = [ctx for ctx in book_contexts + [llm_context] if ctx and ctx.strip()]
-        combined_context_for_llm = "\n---\n".join(all_context_parts) if all_context_parts else "No additional context available."
+        combined_context_for_llm = "\n---\n".join(all_context_parts) if all_context_parts else "No additional relevant context found."
         MAX_CONTEXT_LEN = 3000
         if len(combined_context_for_llm) > MAX_CONTEXT_LEN:
              logger.warning(f"Combined context length ({len(combined_context_for_llm)}) exceeds limit {MAX_CONTEXT_LEN}, truncating.")
-             combined_context_for_llm = "... (truncated) ..." + combined_context_for_llm[-MAX_CONTEXT_LEN:]
+             combined_context_for_llm = "... (truncated context) ..." + combined_context_for_llm[-MAX_CONTEXT_LEN + 25:] # Keep end part
 
-        # Inject this combined context as a new system message before the final user query
-        # or after the initial system prompt with preferences.
-        context_injection_message = {"role": "system", "content": f"Relevant Context for the current query:\n{combined_context_for_llm}"}
+        # Inject this combined context as a new system message
+        context_injection_message = {"role": "system", 
+                                     "content": f"Consider the following relevant context for the user's query:\n{combined_context_for_llm}"}
+        conversation_for_llm.append(context_injection_message)
 
-        # Find the index of the last user message to insert context before it,
-        # OR insert after the first system message. For simplicity, let's insert after the first system message.
-        if len(conversation_for_llm) > 1: # If there's more than just the initial system prompt
-            conversation_for_llm.insert(1, context_injection_message)
-        else: # Only initial system prompt exists, append context then re-append user query if any
-            conversation_for_llm.append(context_injection_message)
-            # Re-ensure the last message is the user's actual query if valid_messages wasn't empty
-            if valid_messages and valid_messages[-1]['role'] == 'user':
-                if conversation_for_llm[-1] != valid_messages[-1]:
-                    conversation_for_llm.append(valid_messages[-1])
-            elif not valid_messages: # Should have been caught by "Messages field required"
-                 logger.error("Logic error: No valid messages from request to construct LLM prompt.")
-                 return jsonify({"error": "Internal error constructing LLM prompt."}), 500
+        # Add message history from Vapi's request AFTER your system prompts
+        # This 'messages_from_vapi_request' should already be correctly formatted by Vapi
+        # if it's managing tool calls and results. The OpenAI error indicates it might not be.
+        # We pass it as is; if OpenAI errors, it's likely due to Vapi's structure for tool calls/results.
+        valid_messages = [
+            msg for msg in messages_from_vapi_request
+            if isinstance(msg, dict) and 'role' in msg and ('content' in msg or 'tool_calls' in msg or 'tool_call_id' in msg)
+        ]
+        conversation_for_llm.extend(valid_messages)
 
         # --- DETAILED LOGGING OF LLM REQUEST ---
         logger.info("--- Preparing LLM Request ---")
-        logger.info(f"Target Model: {model_name_from_request}")
+        logger.info(f"Target Model: {model_name_from_vapi_request}")
         logger.info("Messages being sent to LLM:")
         for i, msg_llm in enumerate(conversation_for_llm):
             role_llm = msg_llm.get('role', 'unknown_role')
             content_llm = msg_llm.get('content', '')
-            content_preview_llm = (content_llm[:200] + '...') if len(content_llm) > 203 else content_llm
-            logger.info(f"  MSG {i+1} | ROLE: {role_llm} | CONTENT PREVIEW: {content_preview_llm.replace(os.linesep, ' ')}")
-            # Uncomment to log full content of specific messages for deeper debugging:
-            if "Relevant Context" in content_llm:
-                logger.debug(f"    FULL CONTEXT CONTENT:\n{content_llm}")
-            if "User Preferences" in content_llm:
-                logger.debug(f"    FULL PREFERENCES CONTENT:\n{content_llm}")
+            tool_calls_llm = msg_llm.get('tool_calls')
+            tool_call_id_llm = msg_llm.get('tool_call_id')
 
-        # if tools_from_request:
-        #     logger.info(f"Tools for LLM: {json.dumps(tools_from_request, indent=2)}")
-        logger.info(f"Temperature: {temperature_from_request}")
-        logger.info(f"Stream: {stream_flag}")
-        if max_tokens_from_request: logger.info(f"Max Tokens: {max_tokens_from_request}")
+            log_line = f"  MSG {i+1} | ROLE: {role_llm}"
+            if content_llm is not None: # Content can be null for assistant tool calls
+                content_preview_llm = (str(content_llm)[:150] + '...') if len(str(content_llm)) > 153 else str(content_llm)
+                log_line += f" | CONTENT PREVIEW: {content_preview_llm.replace(os.linesep, ' ')}"
+            if tool_calls_llm:
+                log_line += f" | TOOL_CALLS: {json.dumps(tool_calls_llm)}"
+            if tool_call_id_llm:
+                log_line += f" | TOOL_CALL_ID: {tool_call_id_llm}"
+            logger.info(log_line)
+
+        if tools_from_vapi_request: logger.info(f"Tools for LLM: {json.dumps(tools_from_vapi_request, indent=2)}")
+        logger.info(f"Temperature: {temperature_from_vapi_request}")
+        logger.info(f"Stream: {stream_flag_from_vapi_request}")
+        if max_tokens_from_vapi_request: logger.info(f"Max Tokens: {max_tokens_from_vapi_request}")
         logger.info("--- End LLM Request Preparation ---")
         # --- END DETAILED LOGGING ---
 
         # --- Prepare and Call LLM ---
         llm_request_data = {
-            "model": model_name_from_request,
+            "model": model_name_from_vapi_request,
             "messages": conversation_for_llm,
-            "temperature": temperature_from_request,
-            "stream": stream_flag,
+            "temperature": temperature_from_vapi_request,
+            "stream": stream_flag_from_vapi_request,
         }
-        if max_tokens_from_request: llm_request_data["max_tokens"] = max_tokens_from_request
-        if tools_from_request: llm_request_data["tools"] = tools_from_request
+        if max_tokens_from_vapi_request: llm_request_data["max_tokens"] = max_tokens_from_vapi_request
+        if tools_from_vapi_request: llm_request_data["tools"] = tools_from_vapi_request
 
         if not client_openai:
              logger.error("OpenAI client (client_openai) is not initialized.")
              return jsonify({"error": "LLM client not configured."}), 500
 
-        if stream_flag:
+        if stream_flag_from_vapi_request:
             try:
                 chat_completion_stream = client_openai.chat.completions.create(**llm_request_data)
                 return Response(generate_streaming_response(chat_completion_stream), content_type='text/event-stream')
             except Exception as llm_err:
                  logger.error(f"Error during LLM streaming call: {llm_err}", exc_info=True)
-                 return jsonify({"error": "Failed to get streaming response from LLM."}), 500
+                 # Try to return the error message from OpenAI if available
+                 error_detail = str(llm_err)
+                 if hasattr(llm_err, 'response') and hasattr(llm_err.response, 'json'):
+                     try: error_detail = llm_err.response.json()
+                     except: pass
+                 return jsonify({"error": "Failed to get streaming response from LLM.", "detail": error_detail}), 500
         else:
             try:
                 chat_completion = client_openai.chat.completions.create(**llm_request_data)
                 return Response(chat_completion.model_dump_json(indent=2), content_type='application/json')
             except Exception as llm_err:
                 logger.error(f"Error during LLM non-streaming call: {llm_err}", exc_info=True)
-                return jsonify({"error": "Failed to get response from LLM."}), 500
+                error_detail = str(llm_err)
+                if hasattr(llm_err, 'response') and hasattr(llm_err.response, 'json'):
+                     try: error_detail = llm_err.response.json()
+                     except: pass
+                return jsonify({"error": "Failed to get response from LLM.", "detail": error_detail}), 500
         # --- End Call LLM ---
 
     # --- Error Handling ---
     except ValidationError as ve:
-        logger.error(f"Pydantic Validation Error in chat: {str(ve)}")
+        logger.error(f"Pydantic Validation Error in chat (should not happen with direct parsing): {str(ve)}")
         return jsonify({"error": f"Invalid data structure: {ve}"}), 400
-    except ValueError as ve:
+    except ValueError as ve: # Catch other value errors
         logger.error(f"ValueError processing chat completion request: {str(ve)}")
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
+        # Catch-all for any other unexpected errors during processing
         logger.error(f"Unexpected error in chat completions route: {str(e)}", exc_info=True)
         return jsonify({"error": "An unexpected internal error occurred processing the chat request."}), 500
-
-# @custom_llm.route('/chat/completions', methods=['POST'])
-# def openai_advanced_chat_completions_route_new():
-#     """
-#     Handle POST requests for OpenAI chat completions, incorporating user context,
-#     preferences (cached), RAG results, and streaming capability.
-#     """
-#     request_data = request.get_json()
-#     print(request_data)
-#     if not request_data:
-#         logger.error("No JSON data provided in chat request.")
-#         return jsonify({"error": "No JSON data provided"}), 400
-
-#     # --- Metadata and Authentication ---
-#     metadata = request_data.get("metadata", {})
-#     token = metadata.get("token", None)
-#     call_id = request_data.get("call", {}).get("id") # VAPI Call ID expected here
-
-#     if not call_id:
-#         logger.error("'call_id' not found in request metadata.")
-#         return jsonify({"error": "call_id is required in metadata."}), 400
-#     if not token:
-#         logger.warning("JWT token not provided in chat request metadata.")
-#         return jsonify({"error": "Authentication token not provided."}), 401
-
-#     # Access cache via extensions
-#     cache = current_app.extensions.get('cache')
-#     if not cache:
-#         logger.error("Cache unavailable in /chat/completions (current_app.extensions['cache'] is None). Check app setup.")
-#         # Proceeding without cache, fallback will trigger DB read.
-
-#     try:
-#         # Decode token to get Supabase User UUID
-#         decoded = decode_token(token)
-#         user_id = decoded['sub'] # This is the Supabase UUID string
-#         logger.info(f"Authenticated Supabase user ID for chat: {user_id}")
-#     except Exception as e:
-#         logger.error(f"Invalid JWT provided in chat request: {str(e)}")
-#         return jsonify({"error": "Invalid or expired token."}), 401
-#     # --- End Authentication ---
-
-#     try:
-#         # --- Generate Session Hash ---
-#         session_id_hash = generate_session_hash(call_id, user_id)
-#         if not session_id_hash:
-#             logger.error(f"Failed to generate session hash for call {call_id}, user {user_id}")
-#             return jsonify({"error": "Failed to generate session identifier."}), 500
-#         logger.info(f"Using session hash for chat: {session_id_hash[:8]}...")
-#         # --- End Session Hash ---
-
-#         # --- Retrieve Context and CACHED Preferences ---
-#         try:
-#             # Fetch recent interaction history for context
-#             llm_context = get_llm_context_from_session(session_id_hash, max_turns=5)
-#         except Exception as context_err:
-#             logger.error(f"Error fetching LLM context for session {session_id_hash}: {context_err}", exc_info=True)
-#             llm_context = "Error retrieving past interactions." # Fallback context
-
-#         # Get preferences FROM CACHE
-#         user_preferences = None
-#         cache_key = f"user_prefs_{user_id}"
-#         if cache: # Check if cache object exists and is usable
-#             try:
-#                 user_preferences = cache.get(cache_key)
-#                 if user_preferences is not None: logger.info(f"Preferences cache HIT for {user_id}")
-#             except Exception as cache_err:
-#                 logger.error(f"Error getting from cache for user {user_id}: {cache_err}")
-#                 user_preferences = None # Treat as miss
-
-#         if user_preferences is None: # Cache miss or error or cache unavailable
-#             log_msg = f"Preferences cache MISS for user {user_id}."
-#             if not cache: log_msg = "Cache unavailable."
-#             logger.info(f"{log_msg} Fetching fallback.")
-
-#             # Fallback: Fetch directly from DB
-#             user_preferences = get_user_preferences_from_db(user_id)
-#             if cache and user_preferences is not None: # Cache if fetch worked AND cache exists
-#                  try:
-#                      # Cache the retrieved prefs OR the defaults if DB returned nothing/error
-#                      cache.set(cache_key, user_preferences or DEFAULT_PREFERENCES)
-#                      logger.info(f"Cached preferences for user {user_id} after fallback fetch.")
-#                  except Exception as cache_err:
-#                      logger.error(f"Error setting cache for user {user_id} after fallback: {cache_err}")
-#             elif not user_preferences:
-#                  logger.warning(f"Fallback preference fetch failed for user {user_id}. Using defaults.")
-
-#         # Ensure user_preferences is a dict, using defaults as final fallback
-#         user_preferences = user_preferences or DEFAULT_PREFERENCES
-#         logger.debug(f"Using preferences for chat: {user_preferences}")
-#         # --- End Context/Preferences Retrieval ---
-
-#         # --- Process Messages & RAG ---
-#         messages = request_data.get("messages", [])
-#         tools = request_data.get("tools")
-#         # Safely access nested model config
-#         model_config = request_data.get("assistant", {}).get("model", {}).get("model")
-#         if not isinstance(model_config, dict): model_config = {}
-#         # Safely access streaming flag
-#         stream = request_data.get("stream", True)
-
-#         if not messages: return jsonify({"error": "Messages field is required."}), 400
-#         # Ensure the last message has content
-#         last_message = messages[-1]
-#         query_string = last_message.get('content', '') if isinstance(last_message, dict) else ''
-#         if not query_string: return jsonify({"error": "Last message has no content or is malformed."}), 400
-
-#         # Handle help request
-#         if query_string.lower() in ["help", "what can i ask?"]:
-#             assistance_text = provide_interaction_assistance()
-#             return Response(generate_streaming_introduction(assistance_text), content_type='text/event-stream')
-
-#         # RAG Queries
-#         book_contexts = []
-#         if user_index and book_index and atomic_habits_keywords: # Check if RAG components are ready
-#             try:
-#                 classification_result = pinecone_rag.classify(query_string, atomic_habits_keywords)
-#                 classification_label = classification_result.label
-#                 logger.info(f"RAG classification for query: {classification_label}")
-#                 if classification_label == "PERSONAL":
-#                     res = pinecone_rag.query_pinecone_user(query_string, user_index, top_k=1, namespace='user-data-openai-embedding')
-#                     if res and res.get('matches'): book_contexts.extend([x.get('metadata', {}).get('text', '') for x in res['matches']])
-#                 elif classification_label == "ATOMIC_HABITS":
-#                     context_strings = pinecone_rag.query_pinecone_book(query_string, top_k=1, namespace='ah-test')
-#                     book_contexts.extend(context_strings)
-#                 logger.debug(f"Retrieved {len(book_contexts)} RAG context snippets.")
-#             except Exception as rag_e:
-#                 logger.error(f"Error during RAG query: {rag_e}", exc_info=True)
-#                 book_contexts = [] # Proceed without RAG context
-#         else:
-#             logger.warning("RAG components not available. Skipping RAG query.")
-#         # --- End Process Messages & RAG ---
-
-#         # --- Prepare Prompt for LLM ---
-#         base_system_prompt = (
-#             "You are a helpful assistant knowledgeable about Atomic Habits. "
-#             "Tailor your responses based on the user's preferences and past conversation history provided below. "
-#             "Avoid using special characters like #,*,&,^,%,$,! unless part of necessary code or examples."
-#         )
-#         try:
-#             # Ensure preferences is serializable - convert values to string
-#             prefs_to_serialize = {k: str(v) for k, v in user_preferences.items()}
-#             prefs_json = json.dumps(prefs_to_serialize)
-#         except TypeError:
-#             logger.warning("Could not serialize user preferences to JSON. Using raw dict string.")
-#             prefs_json = str(user_preferences) # Fallback
-#         system_message_content = f"{base_system_prompt}\nUser Preferences: {prefs_json}"
-
-#         # Build conversation history for LLM
-#         conversation = [{"role": "system", "content": system_message_content}]
-#         # Add message history from request, ensuring structure is correct
-#         valid_messages = [msg for msg in messages if isinstance(msg, dict) and 'role' in msg and 'content' in msg]
-#         conversation.extend(valid_messages)
-
-#         # Combine and potentially truncate context
-#         all_context_parts = [ctx for ctx in book_contexts + [llm_context] if ctx and ctx.strip()]
-#         combined_context = "\n---\n".join(all_context_parts) if all_context_parts else "No additional context available."
-#         MAX_CONTEXT_LEN = 3000 # Example limit - adjust as needed
-#         if len(combined_context) > MAX_CONTEXT_LEN:
-#              logger.warning(f"Combined context length ({len(combined_context)}) exceeds limit {MAX_CONTEXT_LEN}, truncating.")
-#              combined_context = "... (truncated) ..." + combined_context[-MAX_CONTEXT_LEN:]
-
-#         # Inject context as a system message before the last user message (or append)
-#         context_injection_message = {"role": "system", "content": f"Relevant Context:\n{combined_context}"}
-#         # Find the index of the last user message to insert context before it
-#         last_user_msg_index = -1
-#         for i in range(len(conversation) - 1, -1, -1):
-#             if conversation[i].get('role') == 'user':
-#                 last_user_msg_index = i
-#                 break
-
-#         if last_user_msg_index != -1:
-#              conversation.insert(last_user_msg_index, context_injection_message)
-#         else:
-#              # Append if no user message found (shouldn't normally happen with valid input)
-#              conversation.append(context_injection_message)
-#              logger.warning("No user message found in conversation history; appending context at the end.")
-
-#         # --- End Prompt Preparation ---
-
-#         # --- Prepare and Call LLM ---
-#         llm_request_data = {
-#             "model": model_config.get("model", "gpt-4o"),
-#             "messages": conversation,
-#             "temperature": model_config.get("temperature", 0.7),
-#             "stream": stream,
-#         }
-#         # Add tools only if they exist and are not empty
-#         if tools:
-#             llm_request_data["tools"] = tools
-#             # llm_request_data["tool_choice"] = "auto" # Or specific choice if needed
-
-#         logger.info(f"Sending request to LLM: Model={llm_request_data['model']}, Stream={stream}, NumMessages={len(conversation)}")
-#         # logger.debug(f"LLM Payload Messages: {json.dumps(conversation)}") # Use caution logging PII/large data
-
-#         # Ensure OpenAI client is available
-#         if not client_openai:
-#              logger.error("OpenAI client (client_openai) is not initialized.")
-#              return jsonify({"error": "LLM client not configured."}), 500
-
-#         if stream:
-#             # Generate streaming response
-#             try:
-#                 chat_completion_stream = client_openai.chat.completions.create(**llm_request_data)
-#                 return Response(generate_streaming_response(chat_completion_stream), content_type='text/event-stream')
-#             except Exception as llm_err:
-#                  logger.error(f"Error during LLM streaming call: {llm_err}", exc_info=True)
-#                  return jsonify({"error": "Failed to get streaming response from LLM."}), 500
-#         else:
-#             # Generate non-streaming response
-#             try:
-#                 chat_completion = client_openai.chat.completions.create(**llm_request_data)
-#                 # Use model_dump_json() for Pydantic v2 objects from openai>=1.0
-#                 return Response(chat_completion.model_dump_json(indent=2), content_type='application/json')
-#             except Exception as llm_err:
-#                 logger.error(f"Error during LLM non-streaming call: {llm_err}", exc_info=True)
-#                 return jsonify({"error": "Failed to get response from LLM."}), 500
-#         # --- End Call LLM ---
-
-#     # --- Error Handling ---
-#     except ValidationError as ve: # Catch Pydantic validation errors if models were used
-#         logger.error(f"Pydantic Validation Error: {str(ve)}")
-#         return jsonify({"error": f"Invalid data structure: {ve}"}), 400
-#     except ValueError as ve: # Catch other value errors
-#         logger.error(f"ValueError processing chat completion request: {str(ve)}")
-#         return jsonify({"error": str(ve)}), 400
-#     except Exception as e:
-#         # Catch-all for any other unexpected errors during processing
-#         logger.error(f"Unexpected error in chat completions route: {str(e)}", exc_info=True)
-#         return jsonify({"error": "An unexpected internal error occurred processing the chat request."}), 500
 # ==============================================================================

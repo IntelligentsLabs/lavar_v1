@@ -1,0 +1,73 @@
+async def end_of_call_report_handler(payload: Dict[str, Any]) -> Dict[str, Any]: # Return Dict
+    """
+    Handles 'end-of-call-report' and updates the corresponding voice_agent_session
+    in Supabase with summary and recording URLs.
+    """
+    call_id_from_payload = payload.get('call', {}).get('id', 'N/A')
+    logger.info(f"Processing 'end-of-call-report' for call: {call_id_from_payload}")
+    summary = payload.get('summary', 'No summary provided.')
+    logger.info(f"Call Summary: {summary}")
+
+    call_id = payload.get('call', {}).get('id') # Top-level call object in this payload
+    user_email = None
+    try:
+        # Vapi's end-of-call-report includes a 'call' object similar to conversation-update
+        # which might have assistantOverrides metadata
+        user_email = payload.get('call',{}).get('assistantOverrides',{}).get('metadata',{}).get('data',{}).get('user',{}).get('email')
+        if not user_email and payload.get('assistant',{}).get('metadata'): # Fallback to assistant block if present
+            user_email = payload.get('assistant',{}).get('metadata',{}).get('data',{}).get('user',{}).get('email')
+    except Exception as e:
+        logger.warning(f"Could not extract user_email from end-of-call report: {e}")
+
+    if call_id and user_email:
+        supabase_user_uuid = get_supabase_user_id_by_email(user_email)
+        if supabase_user_uuid:
+            session_id_hash = generate_session_hash(call_id, supabase_user_uuid)
+            update_payload = {
+                "session_summary": summary,
+                "end_time": payload.get('endedAt', "now()") # Use endedAt from report, or fallback
+            }
+            # Extract recording URLs from the 'artifact' object
+            artifact = payload.get('artifact', {})
+            if isinstance(artifact, dict):
+                # Vapi payload has 'recording_url' and 'stereo_recording_url' directly under artifact
+                if artifact.get('recording_url'): # Vapi often uses camelCase artifact.recordingUrl
+                    update_payload["recording_url"] = artifact.get('recording_url')
+                elif artifact.get('recordingUrl'): # Check camelCase version too
+                     update_payload["recording_url"] = artifact.get('recordingUrl')
+
+                if artifact.get('stereo_recording_url'):
+                     update_payload["stereo_recording_url"] = artifact.get('stereo_recording_url')
+                elif artifact.get('stereoRecordingUrl'):
+                     update_payload["stereo_recording_url"] = artifact.get('stereoRecordingUrl')
+
+            if payload.get('transcript'):
+                update_payload["full_transcript"] = payload.get('transcript')
+
+
+            if supabase: # Check if supabase client was initialized successfully
+                try:
+                    logger.info(f"Attempting to update session {session_id_hash[:8]} with end-of-call data: {update_payload}")
+                    response = supabase.table("voice_agent_sessions").update(update_payload).eq("session_id", session_id_hash).execute()
+
+                    if hasattr(response, 'error') and response.error:
+                         logger.error(f"Supabase error updating session {session_id_hash[:8]} with EOCR: {response.error}")
+                         return {"status": "error_db_update", "message": "Failed to update session summary in DB."}
+                    else:
+                         logger.info(f"Updated session {session_id_hash[:8]} with end-of-call report details.")
+                         return {"status": "processed", "summary_stored": True, "session_id": session_id_hash}
+                except Exception as e:
+                    logger.error(f"Failed to update session {session_id_hash[:8]} with EOCR summary: {e}", exc_info=True)
+                    return {"status": "error_processing", "message": "Internal error updating session summary."}
+            else:
+                logger.error("Supabase client (imported) is None. Cannot update end-of-call report.")
+                return {"status": "error_db_unavailable", "message": "Database client not configured."}
+        else:
+            logger.warning(f"Could not find Supabase user for email '{user_email}' from end-of-call report. Cannot link session.")
+            return {"status": "acknowledged_user_not_found", "message": "User not found to link session."}
+    else:
+        logger.warning(f"Missing call_id or user_email in end-of-call report. Cannot update session. Call ID: {call_id}, Email: {user_email}")
+        return {"status": "acknowledged_missing_data", "message": "Call ID or User Email missing from report."}
+
+    # Fallback if conditions not met earlier
+    return {"status": "processed_partially", "summary_received": summary}
