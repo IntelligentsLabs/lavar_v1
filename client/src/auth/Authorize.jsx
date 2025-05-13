@@ -3,6 +3,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Use useNavigate hook
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_API_BASE_URL
 
 const Authorize = () => {
   // Destructure necessary functions and state from useAuth0
@@ -36,7 +37,7 @@ const Authorize = () => {
         const response = await fetch(
           // Ensure this URL points correctly to your backend's /token endpoint
           // Use environment variables for base URL in production
-          "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/token", // Example using env var
+          `${REACT_APP_BACKEND_URL}/api/custom_llm/token`, // Example using env var
           // "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/token", // Or hardcoded URL
           {
             method: "POST",

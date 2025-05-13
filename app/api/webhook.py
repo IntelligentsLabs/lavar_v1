@@ -96,7 +96,8 @@ async def tool_call_handler(payload: Dict[str, Any]) -> Dict[str, Any]: # Vapi e
     # Vapi 'function-call' has `toolCallId` at the top level of the payload
     # and the function details under `functionCall`.
     tool_call_id_from_vapi = payload.get("toolCallId", 
-                                         f"unknown_tool_call_{generate_session_hash(payload.get('call',{}).get('id','call'),                                                                         str(payload.get('timestamp','time')))[:8]}")
+                                         f"unknown_tool_call_{generate_session_hash(payload.get('call',{}).get('id','call'),
+                                                                                    str(payload.get('timestamp','time')))[:8]}")
 
     function_details = tool_call_data # This is the content of 'functionCall'
     tool_name = function_details.get("name")

@@ -3,6 +3,8 @@ import Button from "./base/Button";
 import Vapi from "@vapi-ai/web";
 
 const vapi = new Vapi("226815bb-8ad3-4c2e-bc81-a973f0fb163c");
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_API_BASE_URL
+
 console.log(process.env.VAPI_API_KEY);
 const VoiceButton = ({ func }) => {
   const [user, setUser] = useState({});
@@ -21,7 +23,7 @@ const VoiceButton = ({ func }) => {
     if (!token) return;
     try {
       const res = await fetch(
-        "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/user",
+        `${REACT_APP_BACKEND_URL}/api/custom_llm/user`,
         {
           method: "GET",
           headers: {
@@ -55,7 +57,7 @@ const VoiceButton = ({ func }) => {
       if (message.functionCall.name === "changeBackground") {
         const parameter = message.functionCall.parameters;
         fetch(
-          "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/color",
+          `${REACT_APP_BACKEND_URL}/api/custom_llm/color`,
           {
             method: "POST",
             headers: {
@@ -71,7 +73,7 @@ const VoiceButton = ({ func }) => {
       if (message.functionCall.name === "finalizeDetail") {
         const params = message.functionCall.parameters;
         fetch(
-          "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/character",
+           `${REACT_APP_BACKEND_URL}/api/custom_llm/character`,
           {
             method: "POST",
             headers: {
@@ -160,7 +162,7 @@ function addUserName(user) {
     model: {
       model: "gpt-4.1-nano-2025-04-14",
       provider: "custom-llm",
-      url: "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/chat/completions",
+      url: `${REACT_APP_BACKEND_URL}/api/custom_llm/chat/completions`,
       messages: [
         {
           role: "system",
