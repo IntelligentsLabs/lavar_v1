@@ -1,0 +1,144 @@
+// server/services/google-sheets.ts - Google Sheets API wrapper
+
+import { google } from 'googleapis';
+import { OAuthToken } from '../types';
+
+export class GoogleSheetsService {
+  static async getAuthClient(token: OAuthToken) {
+    // Create OAuth2 client with the client credentials
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = 'https://your-app.domain/auth/callback';
+    
+    if (!clientId || !clientSecret) {
+      throw new Error('Missing Google client credentials');
+    }
+    
+    const oauth2Client = new google.auth.OAuth2(
+      clientId,
+      clientSecret,
+      redirectUri
+    );
+    
+    oauth2Client.setCredentials({
+      access_token: token.accessToken,
+      refresh_token: token.refreshToken
+    });
+    
+    return oauth2Client;
+  }
+
+  // List all spreadsheets the user has access to
+  static async listSpreadsheets(token: OAuthToken): Promise<any[]> {
+    try {
+      const auth = await this.getAuthClient(token);
+      const drive = google.drive({ version: 'v3', auth });
+      
+      const response = await drive.files.list({
+        q: "mimeType='application/vnd.google-apps.spreadsheet'",
+        fields: 'files(id, name)',
+        spaces: 'drive',
+      });
+      
+      return response.data.files || [];
+    } catch (error) {
+      console.error('Error listing Google Sheets:', error);
+      throw error;
+    }
+  }
+
+  // Create a new spreadsheet
+  static async createSpreadsheet(token: OAuthToken, name: string): Promise<any> {
+    try {
+      const auth = await this.getAuthClient(token);
+      const sheets = google.sheets({ version: 'v4', auth });
+      
+      const response = await sheets.spreadsheets.create({
+        requestBody: {
+          properties: {
+            title: name
+          },
+          sheets: [
+            {
+              properties: {
+                title: 'Sheet1',
+                gridProperties: {
+                  rowCount: 1000,
+                  columnCount: 26
+                }
+              }
+            }
+          ]
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error creating spreadsheet:', error);
+      throw error;
+    }
+  }
+
+  // Read data from a spreadsheet
+  static async readSpreadsheetData(token: OAuthToken, spreadsheetId: string, range: string): Promise<any[][]> {
+    try {
+      const auth = await this.getAuthClient(token);
+      const sheets = google.sheets({ version: 'v4', auth });
+      
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      
+      return response.data.values || [];
+    } catch (error) {
+      console.error(`Error reading spreadsheet ${spreadsheetId}:`, error);
+      throw error;
+    }
+  }
+
+  // Write data to a spreadsheet
+  static async writeSpreadsheetData(token: OAuthToken, spreadsheetId: string, range: string, values: any[][]): Promise<any> {
+    try {
+      const auth = await this.getAuthClient(token);
+      const sheets = google.sheets({ version: 'v4', auth });
+      
+      const response = await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error writing to spreadsheet ${spreadsheetId}:`, error);
+      throw error;
+    }
+  }
+
+  // Append data to a spreadsheet
+  static async appendSpreadsheetData(token: OAuthToken, spreadsheetId: string, range: string, values: any[][]): Promise<any> {
+    try {
+      const auth = await this.getAuthClient(token);
+      const sheets = google.sheets({ version: 'v4', auth });
+      
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error appending to spreadsheet ${spreadsheetId}:`, error);
+      throw error;
+    }
+  }
+}

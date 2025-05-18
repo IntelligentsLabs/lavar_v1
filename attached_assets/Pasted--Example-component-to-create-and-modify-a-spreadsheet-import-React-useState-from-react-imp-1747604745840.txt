@@ -1,0 +1,116 @@
+// Example component to create and modify a spreadsheet
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+
+export default function GoogleSheetsManager() {
+  const [spreadsheetName, setSpreadsheetName] = useState('');
+  const [spreadsheetId, setSpreadsheetId] = useState('');
+  const [sheetData, setSheetData] = useState([]);
+
+  // Get list of spreadsheets
+  const { data: spreadsheets, isLoading } = useQuery({
+    queryKey: ['google-spreadsheets'],
+    queryFn: async () => {
+      const response = await fetch('/api/google/spreadsheets');
+      if (!response.ok) throw new Error('Failed to fetch spreadsheets');
+      const data = await response.json();
+      return data.spreadsheets;
+    },
+  });
+
+  // Create a new spreadsheet
+  const createSpreadsheetMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const response = await fetch('/api/google/spreadsheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to create spreadsheet');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setSpreadsheetId(data.spreadsheetId);
+      // Invalidate spreadsheets query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['google-spreadsheets'] });
+    },
+  });
+
+  // Read data from a spreadsheet
+  const fetchSpreadsheetData = async (id: string) => {
+    const response = await fetch(`/api/google/spreadsheets/${id}/values/Sheet1!A1:Z1000`);
+    if (!response.ok) throw new Error('Failed to fetch spreadsheet data');
+    const data = await response.json();
+    setSheetData(data.values);
+  };
+
+  // Handle create spreadsheet
+  const handleCreateSpreadsheet = () => {
+    if (spreadsheetName) {
+      createSpreadsheetMutation.mutate(spreadsheetName);
+    }
+  };
+
+  // Render the component
+  return (
+    <div>
+      <h2>Google Sheets Manager</h2>
+      
+      {/* Create Spreadsheet */}
+      <div>
+        <input
+          type="text"
+          value={spreadsheetName}
+          onChange={(e) => setSpreadsheetName(e.target.value)}
+          placeholder="New spreadsheet name"
+        />
+        <button 
+          onClick={handleCreateSpreadsheet}
+          disabled={createSpreadsheetMutation.isPending}
+        >
+          Create Spreadsheet
+        </button>
+      </div>
+      
+      {/* Spreadsheet List */}
+      <div>
+        <h3>Your Spreadsheets</h3>
+        {isLoading ? (
+          <p>Loading spreadsheets...</p>
+        ) : (
+          <ul>
+            {spreadsheets?.map((sheet) => (
+              <li key={sheet.id}>
+                {sheet.name}
+                <button onClick={() => fetchSpreadsheetData(sheet.id)}>
+                  View Data
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      
+      {/* Spreadsheet Data */}
+      {sheetData.length > 0 && (
+        <div>
+          <h3>Spreadsheet Data</h3>
+          <table>
+            <tbody>
+              {sheetData.map((row, rowIdx) => (
+                <tr key={rowIdx}>
+                  {row.map((cell, cellIdx) => (
+                    <td key={cellIdx}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
