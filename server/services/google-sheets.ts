@@ -4,35 +4,47 @@ import { OAuthToken } from '@shared/schema';
 export class GoogleSheetsService {
   static async getAuthClient(token: OAuthToken) {
     // Create OAuth2 client with the client credentials
-    const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = 'https://fa5d8be3-1109-4f89-ad76-48cbd7c649b7-00-3v44c74ztyuq.picard.replit.dev/auth/callback';
-    
+    const redirectUri = 'https://your-app.domain/auth/callback';
+
     if (!clientId || !clientSecret) {
       throw new Error('Missing Google client credentials');
     }
-    
-    const oauth2Client = new google.auth.OAuth2(
-      clientId,
-      clientSecret,
-      redirectUri
-    );
-    
+
+    const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
     oauth2Client.setCredentials({
       access_token: token.accessToken,
       refresh_token: token.refreshToken
     });
-    
+
+    // Refresh the token if needed
+    oauth2Client.on('tokens', (tokens) => {
+      if (tokens.refresh_token) {
+        // Store the new refresh token if available
+        token.refreshToken = tokens.refresh_token;
+        storage.updateOAuthToken(token.id, { refreshToken: tokens.refresh_token });
+      }
+      token.accessToken = tokens.access_token;
+      storage.updateOAuthToken(token.id, { accessToken: tokens.access_token });
+    });
+
     return oauth2Client;
   }
+
+// Add comprehensive error handling for API requests
+const handleApiError = (error) => {
+  console.error('API request error:', error);
+  throw new Error(error?.response?.data?.error?.message || 'Failed API request');
+};
 
   static async listSpreadsheets(token: OAuthToken): Promise<any[]> {
     try {
       const auth = await this.getAuthClient(token);
       const drive = google.drive({ version: 'v3', auth });
-      
+
       console.log('Fetching Google Sheets with Drive API...');
-      
+
       // More comprehensive query to find all spreadsheets the user has access to
       const response = await drive.files.list({
         q: "mimeType='application/vnd.google-apps.spreadsheet'",
@@ -44,10 +56,10 @@ export class GoogleSheetsService {
         includeItemsFromAllDrives: true,
         supportsAllDrives: true
       });
-      
+
       const files = response.data.files || [];
       console.log(`Found ${files.length} Google Sheets documents`);
-      
+
       // If we didn't find any spreadsheets, try to create a sample one
       if (files.length === 0) {
         console.log('No spreadsheets found, attempting to create a sample one...');
@@ -59,7 +71,7 @@ export class GoogleSheetsService {
           // Continue without creating a spreadsheet
         }
       }
-      
+
       return files;
     } catch (error) {
       console.error('Error listing Google Sheets:', error);
@@ -71,11 +83,11 @@ export class GoogleSheetsService {
     try {
       const auth = await this.getAuthClient(token);
       const sheets = google.sheets({ version: 'v4', auth });
-      
+
       const response = await sheets.spreadsheets.get({
         spreadsheetId
       });
-      
+
       return response.data;
     } catch (error) {
       console.error(`Error getting spreadsheet ${spreadsheetId}:`, error);
@@ -100,25 +112,25 @@ export class GoogleSheetsService {
     try {
       const auth = await this.getAuthClient(token);
       const sheets = google.sheets({ version: 'v4', auth });
-      
+
       console.log(`Fetching headers for Google Sheet ${spreadsheetId}, sheet ${sheetName}...`);
-      
+
       // First, check if there are existing headers
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
         range: `${sheetName}!1:1`
       });
-      
+
       // If we have headers, return them
       if (response.data.values && response.data.values.length > 0 && response.data.values[0].length > 0) {
         console.log(`Found ${response.data.values[0].length} headers in Google Sheet`);
         return response.data.values[0];
       }
-      
+
       // If no headers found, create some default ones
       console.log('No headers found in sheet, creating default headers...');
       const defaultHeaders = ['ID', 'Name', 'Description', 'Status', 'Date', 'Notes'];
-      
+
       try {
         // Add default headers to the sheet
         await sheets.spreadsheets.values.update({
@@ -129,7 +141,7 @@ export class GoogleSheetsService {
             values: [defaultHeaders]
           }
         });
-        
+
         console.log('Added default headers to sheet');
         return defaultHeaders;
       } catch (updateError) {
@@ -148,7 +160,7 @@ export class GoogleSheetsService {
     try {
       const auth = await this.getAuthClient(token);
       const sheets = google.sheets({ version: 'v4', auth });
-      
+
       const response = await sheets.spreadsheets.create({
         requestBody: {
           properties: {
@@ -167,7 +179,7 @@ export class GoogleSheetsService {
           ]
         }
       });
-      
+
       // Add headers to the sheet
       await sheets.spreadsheets.values.update({
         spreadsheetId: response.data.spreadsheetId,
@@ -177,7 +189,7 @@ export class GoogleSheetsService {
           values: [['ID', 'Name', 'Status', 'Date', 'Last Updated']]
         }
       });
-      
+
       return response.data;
     } catch (error) {
       console.error('Error creating Google Sheet:', error);
