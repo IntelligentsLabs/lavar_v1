@@ -38,6 +38,7 @@ const MainLayout = () => {
         <Layout setIsPremium={setIsPremium} isPremium={isPremium}>
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
+<Route path="/integrations" element={<IntegrationDashboard />} />
             <Route path="/stack/chat/:id" element={<InterviewPage />} />
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/interview" element={<InterviewChat />} />
