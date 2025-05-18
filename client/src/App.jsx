@@ -14,6 +14,7 @@ import PremiumPage from "./pages/non-premium";
 import PremiumFeaturesPage from "./pages/premium";
 import { useState } from "react";
 import InterviewChat from "./pages/interviewChat";
+import IntegrationDashboard from "./pages/IntegrationDashboard"; // Add this line
 
 const App = () => {
   return (
