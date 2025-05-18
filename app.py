@@ -156,7 +156,7 @@ except Exception as e:
 cors_origins_str = os.environ.get("CORS_ORIGINS", "*")
 print(cors_origins_str)
 cors_origins = [origin.strip() for origin in cors_origins_str.split(',')]
-print(cors_origins)
+print("*******CORS ORIGINS*********",cors_origins)
 logger.info(f"Configuring CORS for origins: {cors_origins}")
 try:
     CORS(app,
