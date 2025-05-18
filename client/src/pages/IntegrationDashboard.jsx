@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { initiateAirtableAuth, initiateGoogleAuth, exchangeCodeForToken } from '../lib/oauth';
@@ -66,4 +65,3 @@ export default function IntegrationDashboard() {
     </div>
   );
 }
-
