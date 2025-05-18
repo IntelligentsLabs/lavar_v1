@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { initiateAirtableAuth, initiateGoogleAuth, exchangeCodeForToken } from '../lib/oauth';
-import { OAuthToken, IntegrationConfig } from '../types';
+import { OAuthToken, IntegrationConfig } from '../types/index';
 import { Button } from '../components/ui/button';
 
 export default function IntegrationDashboard() {
