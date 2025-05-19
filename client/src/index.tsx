@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Auth0Provider } from "@auth0/auth0-react";
-import App from "./App.jsx";
+import App from "./App";
 import "./global.css";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient.ts";
+import { queryClient } from "./lib/queryClient";
 
 const redirect = window.location.origin + "/authorize";
 // render application
@@ -22,5 +22,5 @@ root.render(
       <App />
       </QueryClientProvider>
     </Auth0Provider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

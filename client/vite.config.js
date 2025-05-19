@@ -52,13 +52,14 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to your backend server
       "/api": {
-        target: "http://localhost:5000",
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },
+    allowedHosts: ["66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev"]
   },
   // Set the entry point to index.js
   optimizeDeps: {
-    entries: ["./src/index.jsx"],
+    entries: ["./src/index.tsx"],
   },
 });

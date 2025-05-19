@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { getOAuthState, exchangeCodeForToken, clearOAuthState } from '@/lib/oauth';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getOAuthState, exchangeCodeForToken, clearOAuthState } from '../lib/oauth';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function AuthCallback() {

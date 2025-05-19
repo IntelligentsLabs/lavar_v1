@@ -3,7 +3,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Use useNavigate hook
-const REACT_APP_BACKEND_URL = process.env.REACT_APP_API_BASE_URL
+const REACT_APP_BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "";
+console.log("This is the URL:",REACT_APP_BACKEND_URL)
 
 const Authorize = () => {
   // Destructure necessary functions and state from useAuth0

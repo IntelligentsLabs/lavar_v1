@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '../../components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table2, FileSpreadsheet, LockIcon } from 'lucide-react';
-import { initiateAirtableAuth, initiateGoogleAuth } from '@/lib/oauth';
+import { initiateAirtableAuth, initiateGoogleAuth } from '../../lib/oauth';
 import { useLocation, useRoute } from 'wouter';
 
 interface ConnectServicesStepProps {
