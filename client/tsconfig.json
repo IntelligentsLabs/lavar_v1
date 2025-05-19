@@ -1,18 +1,23 @@
 {
   "compilerOptions": {
+    "jsx": "react",
+    "module": "commonjs",
     "target": "ES6",
-    "module": "esnext",
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
-    "baseUrl": "src",
-    "paths": {
-      "@/*": ["*"]
-    }
+    "strict": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts","vite-env.d.ts"],
+  "include": ["src","src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts","vite-env.d.ts"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }

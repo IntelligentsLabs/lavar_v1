@@ -59,6 +59,6 @@ export default defineConfig({
   },
   // Set the entry point to index.js
   optimizeDeps: {
-    entries: ["./src/index.js"],
+    entries: ["./src/index.jsx"],
   },
 });
