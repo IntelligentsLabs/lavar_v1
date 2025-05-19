@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tanstack/react-query": "^5.76.1",
     "lucide-react": "^0.511.0",
     "nanoid": "^5.1.5",
     "wouter": "^3.7.0"
