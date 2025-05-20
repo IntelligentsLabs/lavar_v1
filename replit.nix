@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.vim
     pkgs.psmisc
     pkgs.unzip
     pkgs.bfg-repo-cleaner
