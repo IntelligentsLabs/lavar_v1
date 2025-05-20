@@ -36,7 +36,7 @@ export class GoogleSheetsService {
 const handleApiError = (error) => {
   console.error('API request error:', error);
   throw new Error(error?.response?.data?.error?.message || 'Failed API request');
-};x
+};
 
   static async listSpreadsheets(token: OAuthToken): Promise<any[]> {
     try {
