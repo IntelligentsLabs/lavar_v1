@@ -51,8 +51,8 @@ export default defineConfig({
     host: "0.0.0.0", // Required to access from outside
     proxy: {
       // Proxy API requests to your backend server
-      "/auth/callback": {
-        target: "http://localhost:5000",
+      "api": {
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },

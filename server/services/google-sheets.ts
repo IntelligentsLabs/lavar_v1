@@ -6,37 +6,25 @@ export class GoogleSheetsService {
     // Create OAuth2 client with the client credentials
     const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = 'https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3001/auth/callback';
+    const redirectUri = 'https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/auth/callback';
 
     if (!clientId || !clientSecret) {
       throw new Error('Missing Google client credentials');
     }
-    
-    const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+
+    const oauth2Client = new google.auth.OAuth2(
+      clientId,
+      clientSecret,
+      redirectUri
+    );
+
     oauth2Client.setCredentials({
       access_token: token.accessToken,
       refresh_token: token.refreshToken
     });
 
-    // Refresh the token if needed
-    oauth2Client.on('tokens', (tokens) => {
-      if (tokens.refresh_token) {
-        // Store the new refresh token if available
-        token.refreshToken = tokens.refresh_token;
-        storage.updateOAuthToken(token.id, { refreshToken: tokens.refresh_token });
-      }
-      token.accessToken = tokens.access_token;
-      storage.updateOAuthToken(token.id, { accessToken: tokens.access_token });
-    });
-
     return oauth2Client;
   }
-
-// Add comprehensive error handling for API requests
-const handleApiError = (error) => {
-  console.error('API request error:', error);
-  throw new Error(error?.response?.data?.error?.message || 'Failed API request');
-};
 
   static async listSpreadsheets(token: OAuthToken): Promise<any[]> {
     try {
@@ -197,3 +185,7 @@ const handleApiError = (error) => {
     }
   }
 }
+
+    
+
+    
