@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import AvatarLogo from "./avatar";
+const REACT_APP_BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const NavBar = () => {
   const token =
@@ -13,7 +14,7 @@ const NavBar = () => {
   useEffect(() => {
     const getUser = async () => {
       const res = await fetch(
-        "https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev/api/custom_llm/user",
+        `${REACT_APP_BACKEND_URL}/api/custom_llm/user`,
         {
           method: "GET",
           headers: {

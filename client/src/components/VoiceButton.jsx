@@ -3,7 +3,7 @@ import Button from "./base/Button";
 import Vapi from "@vapi-ai/web";
 
 const vapi = new Vapi("226815bb-8ad3-4c2e-bc81-a973f0fb163c");
-const REACT_APP_BACKEND_URL = process.env.REACT_APP_API_BASE_URL || ""; // Use VITE_API_BASE_URL or default to empty string
+const REACT_APP_BACKEND_URL = process.env.VITE_API_BASE_URL || ""; // Use VITE_API_BASE_URL or default to empty string
 
 console.log(process.env.REACT_APP_API_BASE_URL); // Use VITE_VAPI_API_KEY
 const VoiceButton = ({ func }) => {

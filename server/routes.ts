@@ -9,7 +9,7 @@ import {
   insertOAuthTokenSchema,
   integrationConfigSchema,
   integrations,
-} from "@shared/schema";
+} from "../shared/schema";
 
 // Create a Make.com service instance
 const makeService = new MakeService();

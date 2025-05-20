@@ -2,7 +2,7 @@ import {
   users, type User, type InsertUser,
   oauthTokens, type OAuthToken, type InsertOAuthToken,
   integrations, type Integration, type InsertIntegration
-} from "@shared/schema";
+} from "../shared/schema";
 
 // Interface for all storage operations
 export interface IStorage {

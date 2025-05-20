@@ -26,5 +26,12 @@
     "src/**/*.d.ts",
     "vite-env.d.ts"
   ],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.test.ts"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"],
+      "./db": ["./server/db.ts"]
+    }
+  }
 }

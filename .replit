@@ -1,5 +1,5 @@
 run = "python app.py"
-modules = ["bash", "nodejs-20", "python-3.12"]
+modules = ["bash", "nodejs-20", "python-3.12", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
@@ -16,6 +16,14 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3002
+
+[[ports]]
+localPort = 5002
+externalPort = 3003
 
 [[ports]]
 localPort = 8000

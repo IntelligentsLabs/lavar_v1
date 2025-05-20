@@ -250,7 +250,7 @@ def list_endpoints():
 # ------------------------------
 if __name__ == '__main__':
     # Get host, port, and debug mode from environment variables
-    port = int(os.getenv('PORT', 5000)) # Changed default port to 3000
+    port = int(os.getenv('PORT', 5001)) # Changed default port to 3000
     # Use FLASK_DEBUG env var standard practice (set to '1' or 'True' for debug)
     debug_mode = os.environ.get('FLASK_DEBUG', '1').lower() in ['true', '1', 't']
     host = os.environ.get('127.0.0.1', '0.0.0.0') # Listen on all interfaces
