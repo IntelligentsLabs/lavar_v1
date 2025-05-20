@@ -36,6 +36,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add this endpoint to list all routes
+app.get('/list-routes', (_req, res) => {
+  const routes = [];
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      routes.push(middleware.route.path);
+    }
+  });
+  res.json({ routes });
+});
+
 (async () => {
   const server = await registerRoutes(app);
 
