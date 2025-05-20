@@ -1,5 +1,4 @@
 
-```typescript
 // debugEnv.ts
 
 // Safely check if VITE_GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set
@@ -8,4 +7,4 @@ const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 console.log('VITE_GOOGLE_CLIENT_ID:', clientId ? 'Set' : 'Not set');
 console.log('GOOGLE_CLIENT_SECRET:', clientSecret ? 'Set' : 'Not set');
-```
+
