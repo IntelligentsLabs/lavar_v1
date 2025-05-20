@@ -1,17 +1,17 @@
 import { google } from 'googleapis';
-import { OAuthToken } from '@shared/schema';
+import { OAuthToken } from '../../shared/schema';
 
 export class GoogleSheetsService {
   static async getAuthClient(token: OAuthToken) {
     // Create OAuth2 client with the client credentials
-    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = 'https://your-app.domain/auth/callback';
+    const redirectUri = 'https://66793246-3db9-4ceb-9826-7a03fb6463f5-00-tjsgi59cx3ud.worf.replit.dev:3001/auth/callback';
 
     if (!clientId || !clientSecret) {
       throw new Error('Missing Google client credentials');
     }
-
+    
     const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
     oauth2Client.setCredentials({
       access_token: token.accessToken,
@@ -36,7 +36,7 @@ export class GoogleSheetsService {
 const handleApiError = (error) => {
   console.error('API request error:', error);
   throw new Error(error?.response?.data?.error?.message || 'Failed API request');
-};
+};x
 
   static async listSpreadsheets(token: OAuthToken): Promise<any[]> {
     try {

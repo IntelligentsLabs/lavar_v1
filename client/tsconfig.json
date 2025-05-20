@@ -2,16 +2,13 @@
   "compilerOptions": {
     "jsx": "react",
     "module": "esnext",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "baseUrl": ".",
-      "paths": {
-        "@/*": ["client/src/*"]
-      },
+    "paths": {
+      "@/*": ["client/src/*"]
+    },
     "target": "ES6",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -22,6 +19,12 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["src","src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts","vite-env.d.ts"],
+  "include": [
+    "src",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "vite-env.d.ts"
+  ],
   "exclude": ["node_modules", "**/*.test.ts"]
 }

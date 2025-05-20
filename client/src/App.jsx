@@ -15,6 +15,7 @@ import PremiumFeaturesPage from "./pages/premium";
 import { useState } from "react";
 import InterviewChat from "./pages/interviewChat";
 import IntegrationDashboard from "./pages/IntegrationDashboard"; // Add this line
+import AuthCallback from "./pages/auth-callback"; // Import the auth callback component
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/authorize" element={<Authorize />} />
+        <Route path="/auth/callback" element={<AuthCallback />} /> 
         <Route path="/*" element={<MainLayout />} />
       </Routes>
     </BrowserRouter>
